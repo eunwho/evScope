@@ -1,5 +1,7 @@
 //"use strict"; 
 // $sudo dmesg | grep tty 
+// branch dcpower  2020-0706
+
 const NO_SCOPE_DATA = 400;
 var inveStart = 0;
 var digiOut = 0xff;
@@ -18,12 +20,12 @@ function shutdown(callback){
 const SerialPort = require('serialport');
 const Readline = SerialPort.parsers.Readline;
 //const port = new SerialPort('/dev/ttyS0',{
-const port = new SerialPort('/dev/ttyUSB0',{
+const port = new SerialPort('/dev/ttyUSB1',{
 //const port = new SerialPort('/dev/ttyAMA1',{
 //const port = new SerialPort('COM4',{
    //baudRate: 500000
   // baudRate: 115200
-   baudRate: 9600
+   baudRate: 38400
 });
 
 const parser = new Readline();
@@ -211,17 +213,29 @@ parser.on('data',function (data){
 	var command_data = parseFloat(buff.slice(8,16));
 
 	console.log(data);
+//	console.log("\r\n addr="+command_addr);
 
-	if(( buff.length < 16 ) || ( command_addr !== 900 )){
+	if(( buff.length < 16 ) || (command_addr !== 900 )){
+		if( command_addr == 901 ){
+			console.log( " \r\n \r\n --- emmit codelist--- \r\n");
+			myEmitter.emit('mCodeList', data);
+			return;
+		} else {
+			myEmitter.emit('mMessage', data);	
+			return;
+		}
+	}
+/*
+ 		|| ( command_addr !== 900 )){
+	//if( command_addr !== 900 ){
+		if(
 		if( command_addr == 901 ){ 
 			myEmitter.emit('mCodeList', data);
 			return;
 		} else {
-			myEmitter.emit('mMessage', data);
-			return;
 		}
 	}
-
+*/
 	if ( command_data < 100 ) {
 		var rx_data = data.slice(17,24);
 		var buff2 = data.substr(24);
@@ -295,7 +309,8 @@ parser.on('data',function (data){
 
 	myEmitter.emit('mGraph', graphData);
 		return;
-	} else if( command_data > 99 ) {
+//	} else if( command_data > 99 ) {
+	} else {
 		var i, j, lsb, msb, tmp;
 		var offset = 4;
 

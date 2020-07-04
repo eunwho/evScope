@@ -2,9 +2,7 @@
 {% block content %}
 <!-- end of goole gauge -->
 <div class="container" align="center">
-<!--h1 align ="center" style="margin:30px;"> DONG HO INVERTR MONITORING SYSTEM </h1 --> 
-<h1> DONG HO INVERTER MONITORING SYSTEM </h1> 
-</br>
+<!--h1 align ="center" style="margin:30px;"> 동호산업 1000A 전원 </h1 --> 
 
 <div class="wrapper1" align="center">
 	<div class="g1-one" align="center">
@@ -16,57 +14,60 @@
 	</div>
 
 	<div class="g1-three" align="center">
+		<h1> 동호산업 1000A 전원 원격제어 </h1> 
 		<div id="plot1-parent" class="csPlot1" align="center">
 			<canvas id="plot1" class="oscope-canvas oscope-canvas2" width="600" height="300" align="center"></canvas>
 		</div>
 	</div>
-
-	<div class="g1-four" align="center">
-		<table align="center" width="100%">
+	<div class="gi-four" align="center">
+		<div>
+			Code <input type="number" id="txtCodeEdit1" style="width:70px" min="0" max="300" value="0"> 
+			Value <input type="number" id="txtCodeEdit2" style="width:70px" min="0" max="8000" value="0">
+			<button id='btnReadCode' 	class='w3-circle w3-green'  onclick='btnReadCode()'>R</button>
+			<button id='btnWriteCode' 	class='w3-circle w3-red'    onclick='btnWriteCode()'>W</button>		 
+			<textarea id='codeEditResult' class='csEditResult' rows="2" cols="30">	</textarea>
+		</div>
+		<table align="center" width="100%" margin="5px">
+      	<tr>	
+      		<td align = "center">
+         		<button class='w3-button w3-round w3-blue'   onclick='btnStartPower()'>START</button>
+      		</td>
+      		<td align = "center">
+         		<button class='w3-button w3-round w3-yellow'   onclick='btnStartGraph()'>ON-GRAPH</button>
+      		</td>
+      		<td align = "center">
+         		<button class='w3-button w3-round w3-green'   onclick='btnUpVoltage()'>UP I</button>
+      		</td>
+			</tr> 
 			<tr>
-      		<td align = "center" width="20%" height="50px">
-         		<button class='w3-button w3-round w3-purple' onclick='btnRunMotor()' >ON MOTOR</button>
+      		<td align = "center">
+         		<button class='w3-button w3-round w3-red'   onclick='btnStopPower()'>STOP</button>
       		</td>
       		<td align = "center">
-         		<button class='w3-button w3-round w3-green'  onclick='btnSpeedUp()'>SPEED UP</button>
+         		<button class='w3-button w3-round w3-red'   onclick='btnStopGraph()'>OFF-GRAPH</button>
       		</td>
       		<td align = "center">
-         		<button class='w3-button w3-round w3-blue'   onclick='btnStartGraph()'>ON GRAPH</button>
-      		</td>
-      		<td align = "center">
-         		<button class='w3-button w3-round w3-yellow' onclick='btnStartScope()'>ON SCOPE</button>
-      		</td>
-      		<td align = "center">
-         		<button class='w3-button w3-round w3-indigo' onclick='btnSpeedUp1()'>SPEED UP 1%</button>
-      		</td>
-   		</tr> 
-   		<tr>
-      		<td align = "center" height="50px">
-         		<button class='w3-button w3-round w3-red'    onclick='btnStopMotor()'>STOP MOTOR</button>
-      		</td>
-      		<td align = "center">
-         		<button class='w3-button w3-round w3-red'  onclick='btnSpeedDown()'>SPEED DOWN</button>
-      		</td>
-      		<td align = "center">
-         		<button class='w3-button w3-round w3-red'   onclick='btnStopGraph()'>OFF GRAPH</button>
-      		</td>
-      		<td align = "center">
-         		<button class='w3-button w3-round w3-red' onclick='btnStopScope()'>OFF SCOPE</button>
-      		</td>
-      		<td align = "center">
-         		<button class='w3-button w3-round w3-red' onclick='btnTripReset()'>TRIP RESET</button>
+         		<button class='w3-button w3-round w3-red' onclick='btnTripReset()'>RESET</button>
       		</td>
    		</tr> 
 		</table>
-	</div><!-- gi-four -->
-	<div class="gi-five" align="center">
-      <canvas id="gauge3" class='cssGauge' data-type="radial-gauge" data-value-box="true" data-width="200" data-height="200"></canvas>
-	</div>
-	<div class="g1-six" align="center">
-      <canvas id="gauge4" class='cssGauge' data-type="radial-gauge" data-value-box="true" data-width="200" data-height="200" align="left"></canvas>
-	</div>
-</div><!-- wrapper1 -->
 
+	</div>
+	<div class="gi-five" align="center">
+		<div>
+			<select id="idCmdSelect">
+				<option value="0">READ SENSOR ADC</option>
+				<option value="1">READ I and P etc </option>
+				<option value="2">READ ALL CODES</option>
+				<option value="3">READ PWMTRIP&INPUT </option>
+				<option value="4">READ TRIP RECORD</option>
+			</select>
+			<button id='btnWriteCode' 	class='w3-button w3-round w3-green' onclick='btnOptionSendCmd()'>Send</button>
+			<textarea id='txtCodeTable' class='csTxtCodeTable' rows="5" cols="30">	</textarea>
+		</div>
+	</div>
+</div>
+</div><!-- wrapper1 -->
 <div>
 <table align="center">
 	<tr>
@@ -81,284 +82,11 @@
 	</tr>
 </table>
 </div>
-
-<div class="wrapper2">
-
-	<div class="g2-one" align="right">
-		<!-- div id='codeEditResult' class='csEditResult' style="width:300px,height:50px">code result</div> -->
-		<textarea id='codeEditResult' class='csEditResult' rows="2" cols="38">	</textarea>
-		Code <input type="number" id="txtCodeEdit1" style="width:70px" min="0" max="300" value="0"> 
-		Value <input type="number" id="txtCodeEdit2" style="width:70px" min="0" max="8000" value="0">
-		<button id='btnReadCode' 	class='w3-circle w3-green'  onclick='btnReadCode()'>R</button>
-		<button id='btnWriteCode' 	class='w3-circle w3-red'    onclick='btnWriteCode()'>W</button>		 
-		</br>
-		</br>
-		<select id="idCmdSelect">
-			<option value="0">READ SENSOR ADC</option>
-			<option value="1">READ RPM etc </option>
-			<option value="2">RESET FROM TRIP</option>
-			<option value="3">READ ALL CODES</option>
-			<option value="4">READ PWMTRIP&INPUT </option>
-			<option value="5">RESET CODE VALUES</option>
-			<option value="6">READ TRIP RECORD</option>
-		</select>
-		<button id='btnWriteCode' 	class='w3-button w3-round w3-green' onclick='btnOptionSendCmd()'>Send</button>
-		</br>
-		</br>
-		<textarea id='txtCodeTable' class='csTxtCodeTable' rows="10" cols="38">	</textarea>
-	</div> <!-- one -->
-
-	<div class="g2-two" align="right">
-		<div id="oscope-parent" class="csOscope" align="center">
-			<canvas id="oscope" class="oscope-canvas" width='400' height='400' ></canvas>
-		</div>
-	</div> <!-- two -->
-
-	<div class="g2-three" align="left">
-
-<table id= "tabG2">
-	<tr>
-		<td>
-			<select name="ch1_list1" onChange="updateCh1Select(this.options.selectedIndex)">
-				<option selected> CH-1 </option> 
-				<option value='I'>Amp </option>
-				<option value='V'>Volt </option>
-				<option value='adc'>ADC </option>
-				<option value='pwm'>PWM </option>
-				<option value='angle'>theta </option>
-			</select>
-			<select name="ch1_list1_list2" onClick="selectScopeCh(0,this.options[this.options.selectedIndex].value)">
-			</select>
-		</td> 
-		<td> 
-			<select id="idScaleCh1">
-			   <option value="0.1"  >0.1/div</option>
-			   <option value="0.2"  >0.2/div</option>
-			   <option value="0.5"  >0.5/div</option>
-			   <option value="1.0"  >1.0/div</option>
-			   <option value="2.0"  >2.0/div</option>
-			   <option selected value="5.0">5.0/div</option>
-			   <option value="10." >10./div</option>
-			   <option value="20." >20./div</option>
-			   <option value="50." >50./div</option>
-			   <option value="100">100/div</option>
-			   <option value="200">200/div</option>
-			   <option value="500">500/div</option>
-         </select>
-		</td>
-	</tr>
-	<tr>
-		<td><font color="gold">OFFSET</font>
-			<!-- input id='idOffsetCh1' type="number" class="offset" min="0" max="9999" value="0" -->
-			<input id='idOffsetCh1' type="number" class="offset" value="0">
-		</td>
-		<td>
-			<button id='btnSetScopeCh1' class='w3-button w3-tiny w3-yellow' onclick='setScopeCh(0)'>SET</button>
-		</td>			
-	</tr>
-
-	<tr>
-		<td>
-			<select name="ch2_list1" onChange="updateCh2Select(this.selectedIndex)">
-				<option selected>CH-2</option>
-				<option value='I'>Amp</option>
-				<option value='V'>Volt</option>
-				<option value='adc'>ADC</option>
-				<option value='pwm'>PWM</option>
-				<option value='angle'>theta </option>
-			</select>
-			<select name="ch2_list1_list2" onClick="selectScopeCh(1,this.options[this.options.selectedIndex].value)">
-			</select>
-		</td> 
-		<td> 
-			<select id="idScaleCh2">
-				<option value="0.1">0.1/div</option>
-			   <option value="0.2">0.2/div</option>
-			   <option value="0.5">0.5/div</option>
-			   <option value="1.0">1.0/div</option>
-			   <option value="2.0">2.0/div</option>
-			   <option selected value="5.0">5.0/div</option>
-			   <option value="10.">10./div</option>
-			   <option value="20.">20./div</option>
-			   <option value="50." >50./div</option>
-			   <option value="100">100/div</option>
-			   <option value="500">500/div</option>
-         </select>
-		</td>
-	</tr>
-	<tr>
-		<td><font color="blue">OFFSET</font> 
-			<input id='idOffsetCh2' type="number" class="offset" value="0">
-		</td>
-		<td>
-			<button id='btnSetScopeCh2' class='w3-button w3-tiny w3-blue' onclick='setScopeCh(1)'>SET</button>
-		</td>			
-	</tr>
-	<tr>
-		<td>
-			<select name="ch3_list1" onChange="updateCh3Select(this.selectedIndex)">
-				<option selected>CH-3</option>
-				<option value='I'>Amp</option>
-				<option value='V'>Volt</option>
-				<option value='adc'>ADC</option>
-				<option value='pwm'>PWM</option>
-				<option value='angle'>theta </option>
-			</select>
-			<select name="ch3_list1_list2" onClick="selectScopeCh(2,this.options[this.options.selectedIndex].value)">
-			</select>
-		</td> 
-		<td> 
-			<select id="idScaleCh3">
-				<option value="0.1">0.1/div</option>
-			   <option value="0.2">0.2/div</option>
-			   <option value="0.5">0.5/div</option>
-			   <option value="1.0">1.0/div</option>
-			   <option value="2.0">2.0/div</option>
-			   <option selected value="5.0">5.0/div</option>
-			   <option value="10.">10./div</option>
-			   <option value="20.">20./div</option>
-			   <option value="50." >50./div</option>
-			   <option value="100">100/div</option>
-			   <option value="500">500/div</option>
-         </select>
-		</td>
-	</tr>
-	<tr>
-		<td><font color="hotpink">OFFSET</font>
-			<input id='idOffsetCh3' type="number" class="offset" value="0">
-		</td>
-		<td>
-			<button id='btnSetScopeCh3' class='w3-button w3-tiny w3-pink' onclick='setScopeCh(2)'>SET</button>
-		</td>			
-	</tr>
-	<tr>
-		<td>
-			<select name="ch4_list1" onChange="updateCh4Select(this.selectedIndex)">
-				<option selected>CH-4</option>
-				<option value='I'>Amp</option>
-				<option value='V'>Volt</option>
-				<option value='adc'>ADC</option>
-				<option value='pwm'>PWM</option>
-				<option value='angle'>theta </option>
-			</select>
-			<select name="ch4_list1_list2" onClick="selectScopeCh(3,this.options[this.options.selectedIndex].value)">
-			</select>
-		</td> 
-		<td> 
-			<select id="idScaleCh4">
-				<option value="0.1">0.1/div</option>
-			   <option value="0.2">0.2/div</option>
-			   <option value="0.5">0.5/div</option>
-			   <option value="1.0">1.0/div</option>
-			   <option value="2.0">2.0/div</option>
-			   <option selected value="5.0">5.0/div</option>
-			   <option value="10.">10./div</option>
-			   <option value="20.">20./div</option>
-			   <option value="50." >50./div</option>
-			   <option value="100">100/div</option>
-			   <option value="500">500/div</option>
-         </select>
-		</td>
-	</tr>
-	<tr>
-		<td><font color="palegreen">OFFSET</font>
-			<input id='idOffsetCh4' type="number" class="offset" value="0">
-		</td>
-		<td>
-			<button id='btnSetScopeCh4' class='w3-button w3-tiny w3-green' onclick='setScopeCh(3)'>SET</button>
-		</td>			
-	</tr>
-	<tr>
-			<button id='btnXyPlotOn' class='w3-button w3-tiny w3-blue' onclick='xyPlotOn(1)'>xy-PlotOn</button>
-			<button id='btnXyPlotOff' class='w3-button w3-tiny w3-red' onclick='xyPlotOn(0)'>xy-PlotOn</button>
-	</tr>
-</table>
-</div><!-- three -->
-
-</div><!-- wrapper -->
-
 <div align = "center" class='tail' style="margin:20px">
-	<span class="title1 titleName"> Inverter Monitoring System by Dong-Ho Power Electronic ( T.E.L.82-51-262-7532 ) </span>
+	<span class="title1 titleName"> DC Power Monitoring System by Dong-Ho Power Electronic ( T.E.L.82-51-262-7532 ) </span>
 </div> <!-- tail-->
-
 </div> <!-- container -->
 <!-- control handlers -->
-
-<script>
-
-var ch1_list = document.getElementsByName('ch1_list1_list2')[0];
-var ch2_list = document.getElementsByName('ch2_list1_list2')[0];
-var ch3_list = document.getElementsByName('ch3_list1_list2')[0];
-var ch4_list = document.getElementsByName('ch4_list1_list2')[0];
-
-var ChList = new Array();
-ChList[0] ='';
-ChList[1] = ['U|4','V|5','W|6','d|0','q|1','D|2','Q|3'];
-ChList[2] = ['U|11','V|12','W|13','d|7','q|8','D|9','Q|10'];
-ChList[3] = ['Iu|14','Iv|15','se|18','cmd|19','Vdc|16','T|17'];
-ChList[4] = ['U|20','V|21','W|22'];
-ChList[5] = ['Theta|30','ThetaM|31','sinTheta|32','cosTheta|33','we|34','wr|35','wr_m|36'];
-
-function updateCh1Select(selectedGroup){
-    if (selectedGroup>0){
-        for (var i=0; i < ChList[selectedGroup].length; i++)
-            ch1_list.options[i] = new Option(ChList[selectedGroup][i].split("|")[0], ChList[selectedGroup][i].split("|")[1]);
-    }
-}
-
-function updateCh2Select(selectedGroup){
-    if (selectedGroup>0){
-        for (i=0; i < ChList[selectedGroup].length; i++)
-            ch2_list.options[i]=new Option(ChList[selectedGroup][i].split("|")[0], ChList[selectedGroup][i].split("|")[1]);
-    }
-}
-
-function updateCh3Select(selectedGroup){
-    if (selectedGroup>0){
-        for (i=0; i < ChList[selectedGroup].length; i++)
-            ch3_list.options[i]=new Option(ChList[selectedGroup][i].split("|")[0], ChList[selectedGroup][i].split("|")[1]);
-    }
-}
-
-function updateCh4Select(selectedGroup){
-    ch4_list.options.length=0;
-    if (selectedGroup>0){
-        for (i=0; i < ChList[selectedGroup].length; i++)
-            ch4_list.options[i]=new Option(ChList[selectedGroup][i].split("|")[0], ChList[selectedGroup][i].split("|")[1]);
-    }
-}
-
-var chSelected = new Array();
-chSelected[0] = 0;
-chSelected[1] = 1;
-chSelected[2] = 2;
-chSelected[3] = 3;
-chSelected[4] = 4;
-chSelected[5] = 5;
-
-function selectScopeCh(ch, selected){
-   chSelected[ch] = selected;
-}
-
-function setScopeCh(ch){
-
-   var chanel = ch+1;
-   var selector = document.getElementById("idScaleCh"+chanel);
-   var scale = selector[selector.selectedIndex].value;
-
-   var setId = "idOffsetCh"+chanel;
-   console.log("setId = ",setId); 
-   var offset = document.getElementById(setId).value;
-
-   console.log(chSelected[ch],scale,offset);
-   sendSetScopeChCmd(ch,chSelected[ch],scale,offset);
-}
-
-function xyPlotOn(arg1){
-   xyPlotState = arg1;
-   console.log('xyPloteState = ',arg1);   
-}
-
 
 </script>
 {% endblock %}
