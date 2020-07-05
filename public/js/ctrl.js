@@ -251,27 +251,22 @@ socket.on('trace', function (msg) {
 
 socket.on('graph', function (msg) {
  
-//   console.log('rpm =',msg.rpm,'Irms =',msg.Irms,'P_total =',msg.Power,' ref_out = ',msg.Ref,'Vdc = ',msg.Vdc);
-//   console.log('Graph1 =',msg.rpm,'Irms =',msg.Irms,'P_total =',msg.Power,' ref_out = ',msg.Ref,'Vdc = ',msg.Vdc);
    graphCount = ( graphCount < 600 ) ? graphCount + 1 : 0 ;
 
    graphData[0].sample[graphCount] = msg.Graph1;
    graphData[1].sample[graphCount] = msg.Graph2; 
    graphData[2].sample[graphCount] = msg.Graph3; 
-   graphData[3].sample[graphCount] = msg.Graph4;; 
+   graphData[3].sample[graphCount] = msg.Graph4;
    graphData[4].sample[graphCount] = msg.Graph5; 
    graphData[5].sample[graphCount] = msg.Graph6; 
    graphInverter.onPaint(graphData);
 
+   var I_rms =   ((msg.Graph5 -2048)/ 2048) * 1000;
+   var Power =   ((msg.Graph6 -2048)/ 2048) * 20;
 
-//convert to
-
-   var adcIout =   ((msg.Irms -2048)/ 2048) * I_SENS_VALUE;
-   var adcVout =   ((msg.rpm  -2048)/ 2048) * 5000;
-   var adcVdc  =     ((msg.Vdc  -2048)/ 2048) * 1000;
-   var I_rms =   ((msg.Irms -2048)/ 2048) * I_SENS_VALUE;
-   var Power =   ((msg.rpm  -2048)/ 2048) * 5000;
-
+	console.log('graph4=',msg.Graph5,'graph5 = ',msg.Graph5);
+	// console.log('graph4=',I_rms,'graph5 = ',Power);
+	
    $('#gauge1').attr('data-value', I_rms);
    $('#gauge2').attr('data-value', Power);
 });

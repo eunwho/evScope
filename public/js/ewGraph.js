@@ -175,7 +175,7 @@ var graphInverter = (function() {
       d[0] = v[0] * w;
       d[1] = v[1] * h;
       return d;
-1    });
+    });
 
     // rescale cursor
     m_cursor = cursor_base.map(function(v) {
