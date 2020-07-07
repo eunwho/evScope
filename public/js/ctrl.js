@@ -8,7 +8,7 @@ var noVac = 1;
 var socket = io.connect();
 var messages = 0;
 
-const dataLength = 600;
+const dataLength = 500;
 var graphCount = 0;
 var graphData = new Array();
 
@@ -22,7 +22,7 @@ graphData[5] = { channel:5,length:dataLength,sample:[dataLength]};
 
 function graphClear(){
    for( var j = 0 ; j < 6 ; j++){
-      for( var i = 0 ; i < 600 ; i++ ) graphData[j].sample[i] = 2048;
+      for( var i = 0 ; i < 499 ; i++ ) graphData[j].sample[i] = 2048;
    }
    graphCount = 0;
    graphInverter.onPaint(graphData);
@@ -226,7 +226,8 @@ socket.on('disconnect',function() {
 });
 
 socket.on('message',function(msg){
-   document.getElementById('codeEditResult').innerHTML = msg;
+	var tmp = document.getElementById('codeEditResult');
+   tmp.value = tmp;
 });   
 
 socket.on('codeList', function (msg) {
@@ -251,7 +252,7 @@ socket.on('trace', function (msg) {
 
 socket.on('graph', function (msg) {
  
-   graphCount = ( graphCount < 600 ) ? graphCount + 1 : 0 ;
+   graphCount = ( graphCount < 499 ) ? graphCount + 1 : 0 ;
 
    graphData[0].sample[graphCount] = msg.Graph1;
    graphData[1].sample[graphCount] = msg.Graph2; 
@@ -264,8 +265,6 @@ socket.on('graph', function (msg) {
    var I_rms =   ((msg.Graph5 -2048)/ 2048) * 1000;
    var Power =   ((msg.Graph6 -2048)/ 2048) * 20;
 
-	console.log('graph4=',msg.Graph5,'graph5 = ',msg.Graph5);
-	// console.log('graph4=',I_rms,'graph5 = ',Power);
 	
    $('#gauge1').attr('data-value', I_rms);
    $('#gauge2').attr('data-value', Power);
