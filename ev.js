@@ -20,7 +20,7 @@ const Readline = SerialPort.parsers.Readline;
 //const port = new SerialPort('/dev/ttyS0',{
 //const port = new SerialPort('/dev/ttyUSB0',{
 //const port = new SerialPort('/dev/ttyAMA1',{
-const port = new SerialPort('COM5',{
+const port = new SerialPort('COM3',{
    //baudRate: 500000
    baudRate: 115200
 });
@@ -210,6 +210,12 @@ parser.on('data',function (data){
 	var command_data = parseFloat(buff.slice(8,16));
 
 	console.log(data);
+//	console.log('\r\n'+'buffer.length = '+ buff.length);
+
+	if( buff.length > 2000 ){
+		myEmitter.emit('mCodeList', data);
+		return;
+	}
 
 	if(( buff.length < 16 ) || ( command_addr !== 900 )){
 		if( command_addr == 901 ){ 
@@ -307,7 +313,8 @@ parser.on('data',function (data){
   		for ( i = 0; i < NO_SCOPE_DATA ; i++){
   			lsb = (buff[ i*3 + 2 + offset] & 0x0f) * 1 + (buff[i*3 + 1 + offset] & 0x0f) * 16;
   			msb = ( buff[i*3 + offset ] & 0x0f ) * 256;
-  			tmp = msb + lsb - 2048;
+  			//tmp = msb + lsb - 2048;
+  			tmp = msb + lsb;
 			scope.data.push(tmp);
 		}
 		myEmitter.emit('mScope', scope);
