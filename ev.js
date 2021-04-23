@@ -23,6 +23,7 @@ const Readline = SerialPort.parsers.Readline;
 const port = new SerialPort('COM3',{
    //baudRate: 500000
    baudRate: 115200
+   // baudRate: 38400
 });
 
 const parser = new Readline();
