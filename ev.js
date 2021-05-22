@@ -197,7 +197,7 @@ io.on('connection', function (socket) {
 
 });
 
-var graphData = { rpm:0,Irms:0,Power:0,Ref:0,Vdc:0,Graph1:0,Graph2:0,Graph3:0,Graph4:0,Graph6:0};
+var graphData = { Vout:0,Iout:0,Po_kW:0,Ref:0,Vdc:0,Graph1:0,Graph2:0,Graph3:0,Graph4:0,Graph6:0};
 var scopeData = {Ch:0,data:[]};
 var graphProcCount = 0;
 
@@ -238,19 +238,19 @@ parser.on('data',function (data){
    	var lsb = (buff[ i*3 + 2] & 0x0f) * 1 + (buff[i*3 + 1] & 0x0f) * 16;
    	var msb = ( buff[i*3] & 0x0f ) * 256;
    	var tmp = msb + lsb;
-		graphData.rpm = tmp;
+		graphData.Vout = tmp;
 
    	i = 1;
    	lsb = (buff[ i*3 + 2] & 0x0f)*1 + (buff[i*3 + 1]  & 0x0f) * 16;
    	msb = ( buff[i*3] & 0x0f ) * 256;
    	tmp = msb + lsb;
-		graphData.Irms = tmp;
+	graphData.Iout = tmp;
 
    	i = 2;
    	lsb = (buff[ i*3 + 2] & 0x0f)*1 + (buff[i*3 + 1] & 0x0f) * 16;
    	msb = ( buff[i*3] & 0x0f ) * 256;
    	tmp = msb + lsb;
-		graphData.Power = tmp;
+	graphData.Po_kW = tmp;
 
    	i = 3;
    	lsb = (buff[ i*3 + 2] & 0x0f)*1 + (buff[i*3 + 1] & 0x0f) * 16;
