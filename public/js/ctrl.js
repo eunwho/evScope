@@ -1,6 +1,9 @@
 
 //--- start the client application
-const I_SENS_VALUE = 20.0;
+const MAX_I_OUT = 1000.0;
+const MAX_PO_KW = 20.0;
+const MAX_V_OUT = 20.0;
+const MAX_VDC	= 1000.0;
 
 // const NO_SCOPE_DATA = 400;
 
@@ -45,15 +48,14 @@ function scopeClear(){
    oscope.onPaint(scopeData);
 }
 
-var gaugeSpeed={id:'gauge1',unit:'[RPM]',title:'Speed',min:-6000,max:6000,
-mTick:[-6000,-4000,-2000,0,2000,4000,6000],
-//alarm:'[ {"from": -6000, "to":-4000, "color": "rgba(255,  0,  0, 1.0)"},{"from": -4000, "to":-2000, "color": "rgba(255,255,  0, 0.5)"}, {"from": -2000, "to": 2000, "color": "rgba(255,255,255, 0.5)"},{"from":  000 , "to": 4000, "color": "rgba(255,255,  0, 0.5)"}, {"from": 4000 , "to": 6000, "color": "rgba(255,  0,  0, 1.5)"}]'
-alarm:'[ {"from": -6000, "to":-4000, "color": "rgba(255,  0,  0, 1.0)"},{"from": -4000, "to":4000, "color": "rgba(255,255,255, 0.5)"}, {"from": 4000, "to": 6000, "color": "rgba(255,0,0, 1.0)"}]'
+var gaugeSpeed={id:'gauge1',unit:'[V]',title:'Vout[Vdc]',min:0,max:20,
+mTick:[0,5,10,15,20],
+alarm:'[ {"from": 0, "to":10, "color": "rgba(255,255,255,1.0)"},{"from":10, "to":15, "color": "rgba(0,255,0, 0.5)"}, {"from": 15, "to": 20, "color": "rgba(255,0,0, 1.0)"}]'
 }
 
-var gaugeRefOut={id:'gauge2',unit:'[Rate %]',title:'Speed/Torq',min:-300,max:300,
-mTick:[-300,-200,-100,0,100,200,300],
-alarm:'[ {"from": -300, "to":-200,"color": "rgba(255,0,0,1.0)"},{"from": 200,  "to":300, "color": "rgba(255,0,0,1.0)"}]'
+var gaugeRefOut={id:'gauge2',unit:'[kW]',title:'Power Out',min:0,max:20,
+mTick:[0,5,10,15,20],
+alarm:'[ {"from": 0, "to":10, "color": "rgba(255,255,255,1.0)"},{"from":10, "to":15, "color": "rgba(0,255,0, 0.5)"}, {"from": 15, "to": 20, "color": "rgba(255,0,0, 1.0)"}]'
 }
 
 var gaugeI500={id:'gauge3',unit:'[A]',title:'I_ac',min:0,max:500,
@@ -104,7 +106,8 @@ $("document").ready(function() {
 
    gaugeInit(gaugeSpeed);
    gaugeInit(gaugeRefOut);
-   gaugeInit(gaugeI10);
+//   gaugeInit(gaugeI10);
+   gaugeInit(gaugeI500);
    gaugeInit(gaugeQ);
 
 });
@@ -158,7 +161,9 @@ function btnSpeedUp(){
 
 function btnSpeedUp1(){
    cmd = '9:4:905:4.000e+0';  // sciCmdStart
-   socket.emit('codeEdit',cmd);
+   //socket.emit('codeEdit',cmd);
+   //socket.emit('codeEdit',cmd);
+   socket.emit('testModbus',cmd);  // 2021.06.21
 }
 
 function btnSpeedDown(){
@@ -249,54 +254,33 @@ var monitorOnOff = 0;
 function getSciCmd( ){
 
    var returns = 'Invalid number';
-   var tmp1 = document.getElementById('txtCodeEdit1').value;
    var tmp2 = document.getElementById('txtCodeEdit2').value;
 
-   tmp1 = tmp1 * 1;
    tmp2 = tmp2 * 1;
 
-   if(isNaN(tmp1)) return returns;
    if(isNaN(tmp2)) return returns;
-   if(( tmp1 > 990 ) || ( tmp1 < 0 )) return returns;
-
-   var sciCmd = '9:4:';
-   if(tmp1 < 10){
-      sciCmd = sciCmd + '00';
-   } else if ( tmp1 < 100 ){ 
-      sciCmd = sciCmd + '0';
-   }
-
-   sciCmd = sciCmd + tmp1 + ':';
-
-   var codeData = tmp2.toExponential(3);
-   
-   sciCmd = sciCmd + codeData;
-
-   if((sciCmd.length) != 16) return returns;
-
-   return sciCmd;
+   if(( tmp2 > 999 ) || ( tmp2 < 0 )) return returns;
+   return tmp2;
 }
+
 function btnReadCode(){ 
-   var returns = getSciCmd( );
-
-   //console.log(returns);
-
-   if( returns.length == 16 ){
-      socket.emit('codeEdit',returns);
-   } else {
-      document.getElementById('codeEditResult').innerHTML = returns;
-   }   
 }
 
 function btnWriteCode(){
-   var returns = getSciCmd( );
 
-   if( returns.length == 16 ){
-      var test = returns.replace('4','6');
-      socket.emit('codeEdit',test);
-   } else {
+   var returns = 'Invalid number';
+   var tmp2 = document.getElementById('txtCodeEdit2').value;
+
+	console.log("Ok");
+   tmp2 = tmp2 * 1;
+
+   if( isNaN(tmp2 )){
       document.getElementById('codeEditResult').innerHTML = returns;
-   }   
+   } else if(( tmp2 > 1000 ) || ( tmp2 < 0 )){
+      document.getElementById('codeEditResult').innerHTML = returns;
+   } else {
+      socket.emit('codeEdit',tmp2);
+   }	
 }
 
 function btnOptionSendCmd(){
@@ -407,8 +391,6 @@ socket.on('trace', function (msg) {
 
 socket.on('graph', function (msg) {
  
-//   console.log('rpm =',msg.rpm,'Irms =',msg.Irms,'P_total =',msg.Power,' ref_out = ',msg.Ref,'Vdc = ',msg.Vdc);
-//   console.log('Graph1 =',msg.rpm,'Irms =',msg.Irms,'P_total =',msg.Power,' ref_out = ',msg.Ref,'Vdc = ',msg.Vdc);
    graphCount = ( graphCount < 600 ) ? graphCount + 1 : 0 ;
 
    graphData[0].sample[graphCount] = msg.Graph1;
@@ -422,44 +404,23 @@ socket.on('graph', function (msg) {
 
 //convert to
 
-   var speed =   ((msg.rpm  -2048)/ 2048) * 5000;
-   var ref_out = ((msg.Ref  -2048)/ 2048) * 500;
-   var I_rms =   ((msg.Irms -2048)/ 2048) * I_SENS_VALUE;
-   var Vdc =     ((msg.Vdc  -2048)/ 2048) * 1000;
+   var Vout  = (( msg.Vout  -2048)/ 2048) * MAX_V_OUT;
+   var Po_kW = (( msg.Po_kW -2048)/ 2048) * MAX_PO_KW;
+   var Iout  = (( msg.Iout  -2048)/ 2048) * MAX_I_OUT;
+   var Vdc   = (( msg.Vdc   -2048)/ 2048) * MAX_VDC;
 
-   console.log('rpm =',speed,'Irms =',I_rms,' ref_out = ',ref_out,'Vdc = ',Vdc);
+   console.log('Vout=',Vout,'Iout =',Iout,'Power[kW]= ',Po_kW,'Vdc = ',Vdc);
 
-   if ( speed > 6000) speed = 6000;
-   if ( speed < -6000) speed = -6000;
-
-   if ( ref_out >  300 ) ref_out = 300;
-   if ( ref_out < -300 ) ref_out = -300;
-
-   if ( I_rms >  500 ) I_rms = 500;
-   if ( I_rms <    0 ) I_rms = 0;
-
-   if ( Vdc  >  800 ) Vdc = 800;
-   if ( Vdc  <    0 ) Vdc = 0;
-  
-   $('#gauge1').attr('data-value', speed);
-   $('#gauge2').attr('data-value', Math.floor(ref_out + 0.5));
-   $('#gauge3').attr('data-value', I_rms);
+   if ( Vout >  MAX_V_OUT) Vout =  MAX_V_OUT;
+   if ( Po_kW   >  MAX_PO_KW ) Po_kW = MAX_PO_KW;
+   if ( Iout >  MAX_I_OUT ) Iout = MAX_I_OUT;
+   if ( Vdc  >  MAX_VDC ) Vdc = MAX_VDC;
+   
+   $('#gauge1').attr('data-value', Vout);
+   $('#gauge2').attr('data-value', Math.floor(Po_kW + 0.5));
+   $('#gauge3').attr('data-value', Iout);
    $('#gauge4').attr('data-value', Vdc);
 });
 var scopeCount = 0;
 
-/*
-setInterval(function(){
-
-   for( var i = 0 ; i < 400 ; i++ ){
-      scopeData[0].sample[i] = 0.5 * 2048 * Math.sin(Math.PI * 2 * i / 400 )+2048;
-      scopeData[1].sample[i] = 0.5 * 2048 * Math.cos(Math.PI * 2 * i / 400 )+2048;
-      scopeData[2].sample[i] = 0.25 * 2048 * Math.sin(Math.PI * 2 * i / 400 )+2048;
-      scopeData[3].sample[i] = 0.25 * 2048 * Math.cos(Math.PI * 2 * i / 400 )+2048;
-	}   
-   oscope.onPaint(scopeData);
-   scopeCount ++;
-   console.log('scopeCount = ',scopeCount);
-},2000);
-*/
 //--- end of ctrl.js

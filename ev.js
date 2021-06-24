@@ -1,5 +1,21 @@
 //"use strict"; 
 // $sudo dmesg | grep tty 
+
+var statArray = [0x74, 0x41,0x44,0x32,	// start, STATUS_READ,length,ID=50,
+	0xE8,0x03,  0x4C,0x04,  0xB0,0x04,		// 1100,  1200,  1300: /100 Current A,B,C Uint16 scale 0.01
+	0x70,0x94,  0xD4,0x94,  0x38,0x95,		// 3800, 38100, 38200: /100 Voltage A,B,C Uint16 scale 0.01
+	0x40,0x1F,  0xA4,0x1F,  0x08,0x20,		// 8000,  8100,  8200: /100 THD A,B,C 0.01
+	0x40,0x17,  0xD4,0x17,  0x38,0x18,		// 6000,  6100,  6200: /100 FREQ A,B,C 0.01
+	0x84,0x03,  0x0E,0x03,  0x98,0x03,		//  900,   910,   920: /10 ANGLE_A,B,C 0.1
+	0x58,0x00,  0x59,0x00,  0x5A,0x00,		//   88,    89,    90: /10 Power kW ANGLE_A,B,C 0.01
+	0xC4,0x09,  0x28,0x0A,  0x8C,0x0A,		// 2500,  2600,  2700: /100 Temperature A,B,C 0.01
+	0x32,0x00,  0x3C,0x00,  0x46,0x00,		//   50,    60,    70: /100 P Power kW A,B,C 0.01
+	0xDE,0x03,  0xD4,0x03,  0xCA,0x03,		//  990,   980,   970: /1000 Power Factor A,B,C 0.001
+//	0x11,0x11,  0x22,0x22,  0x33,0x33,		//  990,   980,   970: /1000 Power Factor A,B,C 0.001
+	0x11,0x22,  0x33,0x44,  0x55,0x66,		//  990,   980,   970: /1000 Power Factor A,B,C 0.001
+//	0x58,0x00,  0x59,0x00,  0x5A,0x00,		//   88,    89,    90: /10 QPower kW ANGLE_A,B,C 0.01
+	0x55,0xAA];								// system status
+
 const NO_SCOPE_DATA = 400;
 var inveStart = 0;
 var digiOut = 0xff;
@@ -10,6 +26,10 @@ var scopeOnOff = 0;
 
 var exec = require('child_process').exec;
 
+function calcCheckSum(){
+}	
+
+	
 // Create shutdown function
 function shutdown(callback){
     exec('shutdown now', function(error, stdout, stderr){ callback(stdout); });
@@ -17,12 +37,13 @@ function shutdown(callback){
 
 const SerialPort = require('serialport');
 const Readline = SerialPort.parsers.Readline;
-const port = new SerialPort('/dev/ttyS0',{
-//const port = new SerialPort('/dev/ttyUSB1',{
+//const port = new SerialPort('/dev/ttyS0',{
+const port = new SerialPort('/dev/ttyUSB0',{
 //const port = new SerialPort('/dev/ttyAMA1',{
-//const port = new SerialPort('COM4',{
+//const port = new SerialPort('com1',{
    //baudRate: 500000
-   baudRate: 115200
+   //baudRate: 115200
+   baudRate: 38400
 });
 
 const parser = new Readline();
@@ -138,8 +159,61 @@ io.on('connection', function (socket) {
 	});
 
 	socket.on('codeEdit',function(msg){
-		console.log('scoket on codeEdit =',msg);
-		port.write(msg);
+    	    try{	
+	        console.log('scoket on codeEdit =',msg);
+	        console.log('hex value of pF =', msg.toString(16));
+		
+		var pF = msg.toString(16);
+
+		var pFc = '0x'+pF.slice(1,3);
+		var pFd = '0x0'+pF[0];
+                var pFa =    msg % 256 ;
+                var pFb =    parseInt( msg / 256) ;
+ 
+	        //console.log('pFa ='+ pFc,": pFb= "+pFd);
+	        //console.log('pFa ='+ pFa,": pFb= "+pFb);
+		// pFa = 0xe8; pfb = 0x03;				
+		statArray[52] = pFa;
+		statArray[53] = pFb;
+		statArray[54] = pFa;
+		statArray[55] = pFb;
+		statArray[56] = pFa;
+		statArray[57] = pFb;
+
+		console.log(statArray.toString(16));
+
+            }catch(err){
+		console.log(err);
+            }
+	});
+
+   socket.on('testModbus',function(msg){  // 2021.06.21
+		try{
+	                /*		
+     			var temp = statArray.slice(52,7);
+			temp.forEach(function(item,index,arr1){
+				console.log("0x"+item.toString(16));							
+			})
+                        */
+			var sum =0;
+			statArray.forEach(function(item,index,arr2){
+				sum += item;
+			})
+			sum = sum & 0xff;
+
+			var txMsg= [];
+			// txMsg = statArray.push(sum); 
+			txMsg.push(sum);
+			txMsg.push(0x1A);
+		
+			//console.log('tx length =',txMsg.length);
+			port.write(statArray);
+			port.write(txMsg);
+			//port.write('EOF');
+			
+		} catch (error){
+			console.error(error);
+		}
 	});
 
 	socket.on('getCodeList',function(msg){
@@ -178,6 +252,10 @@ io.on('connection', function (socket) {
   });
 
 	//--- emitt graph proc 
+   myEmitter.on('testModbus',function(msg){  // 2021.06.21
+	console.log(msg);
+	});
+
 	myEmitter.on('mMessage',function(data){
 		socket.emit('message',data);
 	});    
@@ -196,7 +274,7 @@ io.on('connection', function (socket) {
 
 });
 
-var graphData = { rpm:0,Irms:0,Power:0,Ref:0,Vdc:0,Graph1:0,Graph2:0,Graph3:0,Graph4:0,Graph6:0};
+var graphData = { Vout:0,Iout:0,Po_kW:0,Ref:0,Vdc:0,Graph1:0,Graph2:0,Graph3:0,Graph4:0,Graph6:0};
 var scopeData = {Ch:0,data:[]};
 var graphProcCount = 0;
 
@@ -205,11 +283,16 @@ parser.on('data',function (data){
 	var temp2 = 0;
 	var y =0;
 	
-	var buff = new Buffer(data);
+	var buff = new Buffer.from(data);
 	var command_addr = parseInt(buff.slice(4,7));
 	var command_data = parseFloat(buff.slice(8,16));
 
-	console.log(data);
+	console.log(buff);
+
+	if( buff.length > 2000 ){
+		myEmitter.emit('mCodeList', data);
+		return;
+	}
 
 	if(( buff.length < 16 ) || ( command_addr !== 900 )){
 		if( command_addr == 901 ){ 
@@ -221,28 +304,29 @@ parser.on('data',function (data){
 		}
 	}
 
+
 	if ( command_data < 100 ) {
 		var rx_data = data.slice(17,24);
 		var buff2 = data.substr(24);
-   	var buff = new Buffer(buff2,'utf8');
+   	var buff = new Buffer.from(buff2,'utf8');
 
    	var i = 0;
    	var lsb = (buff[ i*3 + 2] & 0x0f) * 1 + (buff[i*3 + 1] & 0x0f) * 16;
    	var msb = ( buff[i*3] & 0x0f ) * 256;
    	var tmp = msb + lsb;
-		graphData.rpm = tmp;
+		graphData.Vout = tmp;
 
    	i = 1;
    	lsb = (buff[ i*3 + 2] & 0x0f)*1 + (buff[i*3 + 1]  & 0x0f) * 16;
    	msb = ( buff[i*3] & 0x0f ) * 256;
    	tmp = msb + lsb;
-		graphData.Irms = tmp;
+	graphData.Iout = tmp;
 
    	i = 2;
    	lsb = (buff[ i*3 + 2] & 0x0f)*1 + (buff[i*3 + 1] & 0x0f) * 16;
    	msb = ( buff[i*3] & 0x0f ) * 256;
    	tmp = msb + lsb;
-		graphData.Power = tmp;
+	graphData.Po_kW = tmp;
 
    	i = 3;
    	lsb = (buff[ i*3 + 2] & 0x0f)*1 + (buff[i*3 + 1] & 0x0f) * 16;
@@ -299,7 +383,7 @@ parser.on('data',function (data){
 		var offset = 4;
 
    	var buff2 = data.substr(17);
-   	var buff = new Buffer(buff2,'utf8');
+   	var buff = new Buffer.from(buff2,'utf8');
 		var scope = {Ch:0,data:[]};
 
 		scope.Ch = buff[2];
@@ -323,8 +407,32 @@ function sleepFor( sleepDuration ){
 //--- time interval 
 
 setInterval(function(){
-	if(graphOnOff) port.write('9:4:900:0.000e+0');
-},1000);
+	//if(graphOnOff) port.write('9:4:900:0.000e+0');
+	if(graphOnOff){ // myEmitter.emit('testModebus','hello  world');
+	console.log("test");
+		try{
+			var sum =0;
+			statArray.forEach(function(item,index,arr2){
+				sum += item;
+			})
+			sum = sum & 0xff;
+
+			var txMsg= [];
+			// txMsg = statArray.push(sum); 
+			txMsg.push(sum);
+			txMsg.push(0x1A);
+		
+			//console.log('tx length =',txMsg.length);
+			port.write(statArray);
+			port.write(txMsg);
+			//port.write('EOF');
+			
+		} catch (error){
+			console.error(error);
+		}
+	}
+
+},2000);
 
 
 setInterval(function() {
