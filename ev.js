@@ -1,20 +1,18 @@
 //"use strict"; 
 // $sudo dmesg | grep tty 
 
-var statArray = [0x74, 0x41,0x44,0x32,	// start, STATUS_READ,length,ID=50,
-	0xE8,0x03,  0x4C,0x04,  0xB0,0x04,		// 1100,  1200,  1300: /100 Current A,B,C Uint16 scale 0.01
-	0x70,0x94,  0xD4,0x94,  0x38,0x95,		// 3800, 38100, 38200: /100 Voltage A,B,C Uint16 scale 0.01
-	0x40,0x1F,  0xA4,0x1F,  0x08,0x20,		// 8000,  8100,  8200: /100 THD A,B,C 0.01
-	0x40,0x17,  0xD4,0x17,  0x38,0x18,		// 6000,  6100,  6200: /100 FREQ A,B,C 0.01
-	0x84,0x03,  0x0E,0x03,  0x98,0x03,		//  900,   910,   920: /10 ANGLE_A,B,C 0.1
-	0x58,0x00,  0x59,0x00,  0x5A,0x00,		//   88,    89,    90: /10 Power kW ANGLE_A,B,C 0.01
-	0xC4,0x09,  0x28,0x0A,  0x8C,0x0A,		// 2500,  2600,  2700: /100 Temperature A,B,C 0.01
-	0x32,0x00,  0x3C,0x00,  0x46,0x00,		//   50,    60,    70: /100 P Power kW A,B,C 0.01
-	0xDE,0x03,  0xD4,0x03,  0xCA,0x03,		//  990,   980,   970: /1000 Power Factor A,B,C 0.001
+var statArray = [0x73, 0x41,0x08,0x31,	// start, STATUS_READ,length,ID=50,
+//	0xE8,0x03,  0x4C,0x04,  0xB0,0x04,		// 1100,  1200,  1300: /100 Current A,B,C Uint16 scale 0.01
+//	0x70,0x94,  0xD4,0x94,  0x38,0x95,		// 3800, 38100, 38200: /100 Voltage A,B,C Uint16 scale 0.01
+//	0x40,0x1F,  0xA4,0x1F,  0x08,0x20,		// 8000,  8100,  8200: /100 THD A,B,C 0.01
+//	0x40,0x17,  0xD4,0x17,  0x38,0x18,		// 6000,  6100,  6200: /100 FREQ A,B,C 0.01
+//	0x84,0x03,  0x0E,0x03,  0x98,0x03,		//  900,   910,   920: /10 ANGLE_A,B,C 0.1
+//	0x58,0x00,  0x59,0x00,  0x5A,0x00,		//   88,    89,    90: /10 Power kW ANGLE_A,B,C 0.01
+//	0xC4,0x09,  0x28,0x0A,  0x8C,0x0A,		// 2500,  2600,  2700: /100 Temperature A,B,C 0.01
+//	0x32,0x00,  0x3C,0x00,  0x46,0x00,		//   50,    60,    70: /100 P Power kW A,B,C 0.01
+//	0xDE,0x03,  0xD4,0x03,  0xCA,0x03,		//  990,   980,   970: /1000 Power Factor A,B,C 0.001
 //	0x11,0x11,  0x22,0x22,  0x33,0x33,		//  990,   980,   970: /1000 Power Factor A,B,C 0.001
-	0x11,0x22,  0x33,0x44,  0x55,0x66,		//  990,   980,   970: /1000 Power Factor A,B,C 0.001
-//	0x58,0x00,  0x59,0x00,  0x5A,0x00,		//   88,    89,    90: /10 QPower kW ANGLE_A,B,C 0.01
-	0x55,0xAA];								// system status
+	0x11,0x22]  // 0x33,0x44,  0x55,0x66,		//  990,   980,   970: /1000 Power Factor A,B,C 0.001
 
 const NO_SCOPE_DATA = 400;
 var inveStart = 0;
@@ -173,13 +171,8 @@ io.on('connection', function (socket) {
 	        //console.log('pFa ='+ pFc,": pFb= "+pFd);
 	        //console.log('pFa ='+ pFa,": pFb= "+pFb);
 		// pFa = 0xe8; pfb = 0x03;				
-		statArray[52] = pFa;
-		statArray[53] = pFb;
-		statArray[54] = pFa;
-		statArray[55] = pFb;
-		statArray[56] = pFa;
-		statArray[57] = pFb;
-
+		statArray[4] = pFa;
+		statArray[5] = pFb;
 		console.log(statArray.toString(16));
 
             }catch(err){
@@ -204,7 +197,7 @@ io.on('connection', function (socket) {
 			var txMsg= [];
 			// txMsg = statArray.push(sum); 
 			txMsg.push(sum);
-			txMsg.push(0x1A);
+			txMsg.push(0x0A);
 		
 			//console.log('tx length =',txMsg.length);
 			port.write(statArray);
