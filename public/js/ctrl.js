@@ -1,6 +1,6 @@
 
 //--- start the client application
-const I_SENS_VALUE = 400.0;
+const I_SENS_VALUE = 20.0;
 
 // const NO_SCOPE_DATA = 400;
 
@@ -104,8 +104,7 @@ $("document").ready(function() {
 
    gaugeInit(gaugeSpeed);
    gaugeInit(gaugeRefOut);
-//   gaugeInit(gaugeI10);
-   gaugeInit(gaugeI500);
+   gaugeInit(gaugeI10);
    gaugeInit(gaugeQ);
 
 });
