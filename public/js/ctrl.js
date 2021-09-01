@@ -181,11 +181,17 @@ function btnTripReset(){
    socket.emit('codeEdit',cmd);
 }
 
+const addrGrapOffs = 12;
+
 function sendSetScopeChCmd(ch,point,scale,offset){
 
    var returns = 'Invalid number';
 
-   var addr = 21 + 3*ch;
+   var checkBox = document.getElementById("checkScope");
+
+	isGraphAddr = (checkBox.checked == false) ? 1 : 0 ;
+ 
+   var addr = 21 + 3*ch + isGrapAddr * addrGrapOffs ;
 	addr = '0'+addr;
 
    var sciCmd = '9:6:'+addr+':';
@@ -204,7 +210,7 @@ function sendSetScopeChCmd(ch,point,scale,offset){
    },500);
 
    //--- setScale
-   addr = 22 + 3*ch;
+   addr = 22 + 3*ch + isGrapAddr * addrGrapOffs;
 	addr = '0' + addr;
 
    sciCmd = '9:6:'+addr+':';
@@ -222,7 +228,7 @@ function sendSetScopeChCmd(ch,point,scale,offset){
    },1000);
 
    //--- setOffset
-   addr = 23 + 3*ch;
+   addr = 23 + 3*ch + isGrapAddr * addrGrapOffs;
 	addr = '0'+addr;
 
    sciCmd = '9:6:'+addr+':';
@@ -461,5 +467,26 @@ setInterval(function(){
    scopeCount ++;
    console.log('scopeCount = ',scopeCount);
 },2000);
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+</head>
+<body>
+
+<h2>Toggle Switch</h2>
+
+
+</body>
+</html> 
+
+
+
+
+
+
+
 */
 //--- end of ctrl.js
