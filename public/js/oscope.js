@@ -1,5 +1,4 @@
 "use strict";
-var xyPlotState = 0;				// 1 scope --> xy plot
 const NO_SCOPE_DATA = 400;
 
 var oscope = (function() {
@@ -404,17 +403,18 @@ var oscope = (function() {
       m_trace[3] = trace[3];
     }
 
+   var xyScopeCheckBox = document.getElementById("checkXY");
+
+   var xyPlotState = (xyScopeCheckBox.checked == true ) ? 1 : 0 ;
+
 	if(xyPlotState==1){
-    // draw last traces
-    if (m_trace[0] !== null) drawXyPlot( m_context, m_trace[0].sample, m_trace[1].sample);
+		if (m_trace[0] !== null) drawXyPlot( m_context, m_trace[0].sample, m_trace[1].sample);
 	} else {
-    // draw last traces
-    if (m_trace[0] !== null) { drawTrace(m_context, m_trace[0], m_width, m_height, 0); }
-    if (m_trace[1] !== null) { drawTrace(m_context, m_trace[1], m_width, m_height, 0); }
-    if (m_trace[2] !== null) { drawTrace(m_context, m_trace[2], m_width, m_height, 0); }
-    if (m_trace[3] !== null) { drawTrace(m_context, m_trace[3], m_width, m_height, 0); }
+		if (m_trace[0] !== null) { drawTrace(m_context, m_trace[0], m_width, m_height, 0); }
+		if (m_trace[1] !== null) { drawTrace(m_context, m_trace[1], m_width, m_height, 0); }
+		if (m_trace[2] !== null) { drawTrace(m_context, m_trace[2], m_width, m_height, 0); }
+		if (m_trace[3] !== null) { drawTrace(m_context, m_trace[3], m_width, m_height, 0); }
 	}
-    // draw text annotations
     drawAnnotations(m_context,m_width,m_height,m_text_size);
   }
 

@@ -181,15 +181,15 @@ function btnTripReset(){
    socket.emit('codeEdit',cmd);
 }
 
-const addrGrapOffs = 12;
 
 function sendSetScopeChCmd(ch,point,scale,offset){
 
+	const addrGrapOffs = 12;
    var returns = 'Invalid number';
 
    var checkBox = document.getElementById("checkScope");
 
-	isGraphAddr = (checkBox.checked == false) ? 1 : 0 ;
+   var isGraphAddr = (checkBox.checked == false) ? 1 : 0 ;
  
    var addr = 21 + 3*ch + isGrapAddr * addrGrapOffs ;
 	addr = '0'+addr;
