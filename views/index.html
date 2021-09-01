@@ -293,9 +293,9 @@ var ch4_list = document.getElementsByName('ch4_list1_list2')[0];
 
 var ChList = new Array();
 ChList[0] ='';
-ChList[1] = ['U|4','V|5','W|6','d|0','q|1','D|2','Q|3'];
-ChList[2] = ['U|11','V|12','W|13','d|7','q|8','D|9','Q|10'];
-ChList[3] = ['Iu|14','Iv|15','se|18','cmd|19','Vdc|16','T|17'];
+ChList[1] = ['U|4','V|5','W|6','d|0','q|1','D|2','Q|3','D_ref|26','Q-ref|27'];
+ChList[2] = ['U|11','V|12','W|13','d|7','q|8','D|9','Q|10','D-ref|28','Q-ref|29'];
+ChList[3] = ['Iu|14','Iv|15','se|18','cmd|19','Vdc|16','Temp|17'];
 ChList[4] = ['U|20','V|21','W|22'];
 ChList[5] = ['Theta|30','ThetaM|31','sinTheta|32','cosTheta|33','we|34','wr|35','wr_m|36'];
 
@@ -353,17 +353,5 @@ function setScopeCh(ch){
    console.log(chSelected[ch],scale,offset);
    sendSetScopeChCmd(ch,chSelected[ch],scale,offset);
 }
-
-function xyPlotOn( ){
-   xyPlotState = 1;
-   console.log('xyPloteState = ',1);   
-}
-
-function xyPlotOff( ){
-   xyPlotState = 0;
-   console.log('xyPloteState = ',0);   
-}
-
-
 </script>
 {% endblock %}

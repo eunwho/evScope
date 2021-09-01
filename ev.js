@@ -302,6 +302,7 @@ parser.on('data',function (data){
 		var scope = {Ch:0,data:[]};
 
 		scope.Ch = buff[2];
+/*
   		for ( i = 0; i < NO_SCOPE_DATA ; i++){
   			lsb = (buff[ i*3 + 2 + offset] & 0x0f) * 1 + (buff[i*3 + 1 + offset] & 0x0f) * 16;
   			msb = ( buff[i*3 + offset ] & 0x0f ) * 256;
@@ -309,6 +310,20 @@ parser.on('data',function (data){
   			tmp = msb + lsb;
 			scope.data.push(tmp);
 		}
+*/
+  		for ( i = 0; i < NO_SCOPE_DATA ; i++){
+
+			msb =  buff[i*2 + offset];
+            // if ( (scopeData[j][i].byte.LSB) & 0x80) str[0] = ( str[4] | 0x20);
+            // if ( (scopeData[j][i].byte.LSB) & 0x40) str[0] = ( str[4] | 0x10);
+
+			if (( msb & 0x20 ) == 0x20 ) lsb = ( buff[i * 2 + 1 + offset ] | 0x80 ) ;
+			if (( msb & 0x10 ) == 0x10 ) lsb = (lsb | 0x40 ) ;
+
+  			tmp = ( msb & 0x0f ) * 256 + lsb * 1 ;
+			scope.data.push(tmp);
+		}
+		// console.log(scope.data);
 		myEmitter.emit('mScope', scope);
 		return;
 	}	

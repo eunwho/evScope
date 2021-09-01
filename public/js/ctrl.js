@@ -189,9 +189,10 @@ function sendSetScopeChCmd(ch,point,scale,offset){
 
    var checkBox = document.getElementById("checkScope");
 
-   var isGraphAddr = (checkBox.checked == false) ? 1 : 0 ;
+   var isGrapAddr = (checkBox.checked == false) ? 1 : 0 ;
  
    var addr = 21 + 3*ch + isGrapAddr * addrGrapOffs ;
+
 	addr = '0'+addr;
 
    var sciCmd = '9:6:'+addr+':';
