@@ -262,6 +262,7 @@ function getSciCmd( ){
    tmp1 = tmp1 * 1;
    tmp2 = tmp2 * 1;
 
+	
    if(isNaN(tmp1)) return returns;
    if(isNaN(tmp2)) return returns;
    if(( tmp1 > 990 ) || ( tmp1 < 0 )) return returns;
@@ -276,6 +277,14 @@ function getSciCmd( ){
    sciCmd = sciCmd + tmp1 + ':';
 
    var codeData = tmp2.toExponential(3);
+
+   //console.log("before write data = "+codeData);
+   if(tmp2 < 0.0 ){
+		var str1 = codeData.substr(0,5);
+		var str2 = codeData.substr(-3);
+		codeData = str1 + str2;
+   }	   
+   //console.log("after write data = "+codeData);
    
    sciCmd = sciCmd + codeData;
 
