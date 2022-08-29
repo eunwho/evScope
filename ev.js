@@ -14,50 +14,6 @@ var exec = require('child_process').exec;
 function shutdown(callback){
     exec('shutdown now', function(error, stdout, stderr){ callback(stdout); });
 }
-﻿
-const {SerialPort} = require('serialport');
-const { ReadlineParser } = require('@serialport/parser-readline');
-
-function showPortClose() {
-  console.log('port closed.');
-}
-
-function showError(error) {
-  console.log('Serial port error: ' + error);
-}
-
-const myPort = new SerialPort({path:'/dev/ttyUSB0', baudRate:115200});
-const parser = myPort.pipe(new ReadlineParser({ delimiter: '\r\n' }));
-
-myPort.pipe(parser);
-myPort.on('open', () => console.log(myPort.baudRate));
-// parser.on('data', readSerialData);
-myPort.on('close', showPortClose);
-myPort.on('error', showError);
-
-/*
-SerialPort.list().then(
-  ports => {
-    ports.forEach(port => {
-    if(port.manufacturer === "Silicon Labs"){
-      const portName = port.path;
-      console.log("Port Set :",portName);
-      const myPort = new SerialPort({path:portName, baudRate:115200});
-      const parser = myPort.pipe(new ReadlineParser({ delimiter: '\r\n' }));
-      myPort.pipe(parser);
-      myPort.on('open', () => console.log(myPort.baudRate));
-      parser.on('data', readSerialData);
-      myPort.on('close', showPortClose);
-      myPort.on('error', showError);
-    }
-
-    })
-  },
-  err => {
-    myConsole.error('Error listing ports', err)
-  }
-);
-*/
 
 const eventEmitter = require('events');
 class MyEmitter extends eventEmitter{};
@@ -160,12 +116,16 @@ io.on('connection', function (socket) {
 
 	socket.on('codeEdit',function(msg){
 		console.log('scoket on codeEdit =',msg);
-		port.write(msg);
+//		myPort.on('readable',()=>console.log('Rxd gavage : ',myPort.read()));
+		console.log("Read Gavage buf:",myPort.read());
+		myPort.write(msg);
 	});
 
 	socket.on('getCodeList',function(msg){
 		console.log('scoket on codeList =',msg);
-		port.write('9:4:901:0.000e+0');
+//		myPort.on('readable',()=>console.log('Rxd gavage : ',myPort.read()));
+		console.log("Read Gavage buf:",myPort.read());
+		myPort.write('9:4:901:0.000e+0');
 	});
 
 /* use io */
@@ -220,25 +180,69 @@ io.on('connection', function (socket) {
 var graphData = { rpm:0,Irms:0,Power:0,Ref:0,Vdc:0,Graph1:0,Graph2:0,Graph3:0,Graph4:0,Graph6:0};
 var scopeData = {Ch:0,data:[]};
 var graphProcCount = 0;
-﻿
-// function readSerialData(data) {
-parser.on('data', function(data){
+
+const {SerialPort} = require('serialport');
+//const { ReadlineParser } = require('@serialport/parser-readline');
+const {InterByteTimeoutParser} = require('@serialport/parser-inter-byte-timeout');
+//const parser = port.pipe(new InterByteTimeoutParser({ interval: 50}));
+
+let portName = '/dev/ttyS0';
+let myPort = new SerialPort({path:portName, baudRate:115200});
+
+// const parser = myPort.pipe(new InterByteTimeoutParser({ interval: 50 }));
+
+/*
+myPort.pipe(parser);
+myPort.on('open', () => console.log(myPort.baudRate));
+parser.on('data', readSerialData);
+myPort.on('close', ()=>console.log("port closed!"));
+myPort.on('error', (err)=>console.log('Error :',err));
+*/
+
+SerialPort.list().then(
+	ports => {
+	  ports.forEach(port => {
+	  if(port.manufacturer === "Silicon Labs"){
+		portName = port.path;
+		myPort = new SerialPort({path:portName, baudRate:115200});
+		//const parser = myPort.pipe(new ReadlineParser({ delimiter: '\r\n' }));
+		const parser = myPort.pipe(new InterByteTimeoutParser({ interval: 100 }));
+		myPort.pipe(parser);
+		myPort.on('open', () => console.log('COM open : '+ portName + ' : ' + 'baudRate = '+ myPort.baudRate ));
+		parser.on('data', readSerialData);
+		myPort.on('close', ()=>console.log("port closed!"));
+		myPort.on('error', (err)=>console.log('Error :',err));
+	  }
+  
+	  })
+	},
+	err => {
+	  console.error('Error listing ports', err)
+	}
+  );
+
+
+function readSerialData(data) {
+// parser.on('data', function(data){
 	var temp1 = 0;
 	var temp2 = 0;
 	var y =0;
+
 
 	var buff = new Buffer.from(data);
 	var command_addr = parseInt(buff.slice(4,7));
 	var command_data = parseFloat(buff.slice(8,16));
 
+	//console.log(data.toString('utf-8'));
 	console.log(data);
 
 	if(( buff.length < 16 ) || ( command_addr !== 900 )){
 		if( command_addr == 901 ){
-			myEmitter.emit('mCodeList', data);
+			// myEmitter.emit('mCodeList', data);
+			myEmitter.emit('mCodeList', data.toString('utf-8'));
 			return;
 		} else {
-			myEmitter.emit('mMessage', data);
+			myEmitter.emit('mMessage', data.toString('utf-8'));
 			return;
 		}
 	}
@@ -353,8 +357,8 @@ parser.on('data', function(data){
 		myEmitter.emit('mScope', scope);
 		return;
 	}
-});
-
+}
+// });
 
 function sleepFor( sleepDuration ){
     var now = new Date().getTime();
@@ -364,12 +368,12 @@ function sleepFor( sleepDuration ){
 //--- time interval
 
 setInterval(function(){
-	if(graphOnOff) port.write('9:4:900:0.000e+0');
+	if(graphOnOff) myPort.write('9:4:900:0.000e+0');
 },1000);
 
 
 setInterval(function() {
-	if(scopeOnOff)	  port.write('9:4:900:1.000e+2');
+	if(scopeOnOff)	  myPort.write('9:4:900:1.000e+2');
 },4000);
 
 setInterval(function(){
@@ -407,9 +411,19 @@ process.on('SIGINT', function () {
     process.exit(0);
 });
 
+/*
 process.on('exit', function () {
     console.log('\nShutting down, performing GPIO cleanup');
     process.exit(0);
+});
+*/
+
+process.on('exit', (code) => {
+	setTimeout(()=>{
+	  console.log('\nShutting down, performing GPIO cleanup');
+ 
+	}, 0);
+    // process.exit(0);
 });
 
 //--- end of scope
