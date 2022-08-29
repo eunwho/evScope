@@ -1,5 +1,5 @@
-//"use strict"; 
-// $sudo dmesg | grep tty 
+//"use strict";
+// $sudo dmesg | grep tty
 const NO_SCOPE_DATA = 400;
 var inveStart = 0;
 var digiOut = 0xff;
@@ -14,28 +14,50 @@ var exec = require('child_process').exec;
 function shutdown(callback){
     exec('shutdown now', function(error, stdout, stderr){ callback(stdout); });
 }
+﻿
+const {SerialPort} = require('serialport');
+const { ReadlineParser } = require('@serialport/parser-readline');
 
-const SerialPort = require('serialport');
-const Readline = SerialPort.parsers.Readline;
-const port = new SerialPort('/dev/ttyS0',{
-//const port = new SerialPort('/dev/ttyUSB0',{
-//const port = new SerialPort('/dev/ttyAMA1',{
-//const port = new SerialPort('COM1',{
-   baudRate: 115200
-});
+function showPortClose() {
+  console.log('port closed.');
+}
 
-const parser = new Readline();
-port.pipe(parser);
+function showError(error) {
+  console.log('Serial port error: ' + error);
+}
 
-port.on('open',function(err){
-   if(err) return console.log('Error on write : '+ err.message);
-   console.log('serial open');
-});
+const myPort = new SerialPort({path:'/dev/ttyUSB0', baudRate:115200});
+const parser = myPort.pipe(new ReadlineParser({ delimiter: '\r\n' }));
 
-port.on('error', function(err) {
-    console.log('Error: ', err.message);
-    console.log('Error Occured');
-});
+myPort.pipe(parser);
+myPort.on('open', () => console.log(myPort.baudRate));
+// parser.on('data', readSerialData);
+myPort.on('close', showPortClose);
+myPort.on('error', showError);
+
+/*
+SerialPort.list().then(
+  ports => {
+    ports.forEach(port => {
+    if(port.manufacturer === "Silicon Labs"){
+      const portName = port.path;
+      console.log("Port Set :",portName);
+      const myPort = new SerialPort({path:portName, baudRate:115200});
+      const parser = myPort.pipe(new ReadlineParser({ delimiter: '\r\n' }));
+      myPort.pipe(parser);
+      myPort.on('open', () => console.log(myPort.baudRate));
+      parser.on('data', readSerialData);
+      myPort.on('close', showPortClose);
+      myPort.on('error', showError);
+    }
+
+    })
+  },
+  err => {
+    myConsole.error('Error listing ports', err)
+  }
+);
+*/
 
 const eventEmitter = require('events');
 class MyEmitter extends eventEmitter{};
@@ -104,7 +126,7 @@ app.use(function(err, req, res, next) {
 });
 
 
-var count = 0; 
+var count = 0;
 var channel = 0;
 var dataLength = 600;
 var traceOnOff =0;			// 1 --> send tarace data to client
@@ -176,34 +198,35 @@ io.on('connection', function (socket) {
 		}
   });
 
-	//--- emitt graph proc 
+	//--- emitt graph proc
 	myEmitter.on('mMessage',function(data){
 		socket.emit('message',data);
-	});    
+	});
 
 	myEmitter.on('mCodeList',function(data){
 		socket.emit('codeList',data);
-	});    
+	});
 
 	myEmitter.on('mGraph',function(data){
 		socket.emit('graph',data);
-	});    
+	});
 
 	myEmitter.on('mScope',function(data){
 		socket.emit('scope',data);
-	});    
+	});
 
 });
 
 var graphData = { rpm:0,Irms:0,Power:0,Ref:0,Vdc:0,Graph1:0,Graph2:0,Graph3:0,Graph4:0,Graph6:0};
 var scopeData = {Ch:0,data:[]};
 var graphProcCount = 0;
-
-parser.on('data',function (data){
+﻿
+// function readSerialData(data) {
+parser.on('data', function(data){
 	var temp1 = 0;
 	var temp2 = 0;
 	var y =0;
-	
+
 	var buff = new Buffer.from(data);
 	var command_addr = parseInt(buff.slice(4,7));
 	var command_data = parseFloat(buff.slice(8,16));
@@ -211,7 +234,7 @@ parser.on('data',function (data){
 	console.log(data);
 
 	if(( buff.length < 16 ) || ( command_addr !== 900 )){
-		if( command_addr == 901 ){ 
+		if( command_addr == 901 ){
 			myEmitter.emit('mCodeList', data);
 			return;
 		} else {
@@ -311,7 +334,7 @@ parser.on('data',function (data){
 			scope.data.push(tmp);
 		}
 
-/* 
+/*
  for ( i = 0; i < NO_SCOPE_DATA ; i++){
 
 			msb =  buff[i*2 + offset];
@@ -325,19 +348,20 @@ parser.on('data',function (data){
   			tmp = ( msb & 0x0f ) * 256 + lsb * 1 ;
 			scope.data.push(tmp);
 		}
-*/		
+*/
 		// console.log(scope.data);
 		myEmitter.emit('mScope', scope);
 		return;
-	}	
+	}
 });
+
 
 function sleepFor( sleepDuration ){
     var now = new Date().getTime();
-    while(new Date().getTime() < now + sleepDuration){ /* do nothing */ } 
+    while(new Date().getTime() < now + sleepDuration){ /* do nothing */ }
 }
 
-//--- time interval 
+//--- time interval
 
 setInterval(function(){
 	if(graphOnOff) port.write('9:4:900:0.000e+0');
@@ -354,7 +378,7 @@ setInterval(function(){
 },10000);
 
 
-//--- processing 
+//--- processing
 
 var exec = require('child_process').exec;
 
@@ -368,7 +392,7 @@ var gracefulShutdown = function() {
     console.log("Closed out remaining connections.");
     process.exit()
   });
-  
+
    setTimeout(function() {
        console.error("Could not close connections in time, forcefully shutting down");
        process.exit()
@@ -382,11 +406,10 @@ process.on('SIGTERM', function () {
 process.on('SIGINT', function () {
     process.exit(0);
 });
- 
+
 process.on('exit', function () {
     console.log('\nShutting down, performing GPIO cleanup');
     process.exit(0);
 });
 
 //--- end of scope
-

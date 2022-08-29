@@ -21,7 +21,7 @@
     "jquery": "^3.2.1",
     "lodash": "^3.7.0",
     "morgan": "^1.5.3",
-    "serialport": "^6.2.2",
+    "serialport": "^10.4.0",
     "serve-favicon": "^2.2.1",
     "socket.io": "^1.7.4",
     "swig": "^1.4.2"
