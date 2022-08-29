@@ -181,11 +181,18 @@ function btnTripReset(){
    socket.emit('codeEdit',cmd);
 }
 
+
 function sendSetScopeChCmd(ch,point,scale,offset){
 
+	const addrGrapOffs = 12;
    var returns = 'Invalid number';
 
-   var addr = 21 + 3*ch;
+   var checkBox = document.getElementById("checkScope");
+
+   var isGrapAddr = (checkBox.checked == false) ? 1 : 0 ;
+ 
+   var addr = 21 + 3*ch + isGrapAddr * addrGrapOffs ;
+
 	addr = '0'+addr;
 
    var sciCmd = '9:6:'+addr+':';
@@ -204,7 +211,7 @@ function sendSetScopeChCmd(ch,point,scale,offset){
    },500);
 
    //--- setScale
-   addr = 22 + 3*ch;
+   addr = 22 + 3*ch + isGrapAddr * addrGrapOffs;
 	addr = '0' + addr;
 
    sciCmd = '9:6:'+addr+':';
@@ -222,7 +229,7 @@ function sendSetScopeChCmd(ch,point,scale,offset){
    },1000);
 
    //--- setOffset
-   addr = 23 + 3*ch;
+   addr = 23 + 3*ch + isGrapAddr * addrGrapOffs;
 	addr = '0'+addr;
 
    sciCmd = '9:6:'+addr+':';
@@ -255,6 +262,7 @@ function getSciCmd( ){
    tmp1 = tmp1 * 1;
    tmp2 = tmp2 * 1;
 
+	
    if(isNaN(tmp1)) return returns;
    if(isNaN(tmp2)) return returns;
    if(( tmp1 > 990 ) || ( tmp1 < 0 )) return returns;
@@ -269,6 +277,14 @@ function getSciCmd( ){
    sciCmd = sciCmd + tmp1 + ':';
 
    var codeData = tmp2.toExponential(3);
+
+   //console.log("before write data = "+codeData);
+   if(tmp2 < 0.0 ){
+		var str1 = codeData.substr(0,5);
+		var str2 = codeData.substr(-3);
+		codeData = str1 + str2;
+   }	   
+   //console.log("after write data = "+codeData);
    
    sciCmd = sciCmd + codeData;
 
@@ -461,5 +477,26 @@ setInterval(function(){
    scopeCount ++;
    console.log('scopeCount = ',scopeCount);
 },2000);
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+</head>
+<body>
+
+<h2>Toggle Switch</h2>
+
+
+</body>
+</html> 
+
+
+
+
+
+
+
 */
 //--- end of ctrl.js

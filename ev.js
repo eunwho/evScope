@@ -18,10 +18,9 @@ function shutdown(callback){
 const SerialPort = require('serialport');
 const Readline = SerialPort.parsers.Readline;
 const port = new SerialPort('/dev/ttyS0',{
-//const port = new SerialPort('/dev/ttyUSB1',{
+//const port = new SerialPort('/dev/ttyUSB0',{
 //const port = new SerialPort('/dev/ttyAMA1',{
-//const port = new SerialPort('COM4',{
-   //baudRate: 500000
+//const port = new SerialPort('COM1',{
    baudRate: 115200
 });
 
@@ -205,7 +204,7 @@ parser.on('data',function (data){
 	var temp2 = 0;
 	var y =0;
 	
-	var buff = new Buffer(data);
+	var buff = new Buffer.from(data);
 	var command_addr = parseInt(buff.slice(4,7));
 	var command_data = parseFloat(buff.slice(8,16));
 
@@ -224,7 +223,7 @@ parser.on('data',function (data){
 	if ( command_data < 100 ) {
 		var rx_data = data.slice(17,24);
 		var buff2 = data.substr(24);
-   	var buff = new Buffer(buff2,'utf8');
+   	var buff = new Buffer.from(buff2,'utf8');
 
    	var i = 0;
    	var lsb = (buff[ i*3 + 2] & 0x0f) * 1 + (buff[i*3 + 1] & 0x0f) * 16;
@@ -299,10 +298,11 @@ parser.on('data',function (data){
 		var offset = 4;
 
    	var buff2 = data.substr(17);
-   	var buff = new Buffer(buff2,'utf8');
+   	var buff = new Buffer.from(buff2,'utf8');
 		var scope = {Ch:0,data:[]};
 
 		scope.Ch = buff[2];
+
   		for ( i = 0; i < NO_SCOPE_DATA ; i++){
   			lsb = (buff[ i*3 + 2 + offset] & 0x0f) * 1 + (buff[i*3 + 1 + offset] & 0x0f) * 16;
   			msb = ( buff[i*3 + offset ] & 0x0f ) * 256;
@@ -310,6 +310,23 @@ parser.on('data',function (data){
   			tmp = msb + lsb;
 			scope.data.push(tmp);
 		}
+
+/* 
+ for ( i = 0; i < NO_SCOPE_DATA ; i++){
+
+			msb =  buff[i*2 + offset];
+            // if ( (scopeData[j][i].byte.LSB) & 0x80) str[0] = ( str[4] | 0x20);
+            // if ( (scopeData[j][i].byte.LSB) & 0x40) str[0] = ( str[4] | 0x10);
+
+			if (( msb & 0x20 ) == 0x20 ) lsb = ( buff[i * 2 + 1 + offset ] | 0x80 ) ;
+			if (( msb & 0x10 ) == 0x00 ) lsb = (lsb & 0xbf ) ;
+
+
+  			tmp = ( msb & 0x0f ) * 256 + lsb * 1 ;
+			scope.data.push(tmp);
+		}
+*/		
+		// console.log(scope.data);
 		myEmitter.emit('mScope', scope);
 		return;
 	}	

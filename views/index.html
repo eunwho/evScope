@@ -3,6 +3,7 @@
 <!-- end of goole gauge -->
 <div class="container" align="center">
 <!--h1 align ="center" style="margin:30px;"> DONG HO INVERTR MONITORING SYSTEM </h1 --> 
+<br>
 <h1> DONG HO INVERTER MONITORING SYSTEM </h1> 
 </br>
 
@@ -81,14 +82,13 @@
 	</tr>
 </table>
 </div>
-
 <div class="wrapper2">
 
 	<div class="g2-one" align="right">
 		<!-- div id='codeEditResult' class='csEditResult' style="width:300px,height:50px">code result</div> -->
-		<textarea id='codeEditResult' class='csEditResult' rows="2" cols="38">	</textarea>
-		Code <input type="number" id="txtCodeEdit1" style="width:70px" min="0" max="300" value="0"> 
-		Value <input type="number" id="txtCodeEdit2" style="width:70px" min="0" max="8000" value="0">
+		<textarea id='codeEditResult' class='csEditResult' rows="2" cols="35">	</textarea>
+		Code <input type="number" id="txtCodeEdit1" style="width:60px" min="0" max="300" value="0"> 
+		Value <input type="number" id="txtCodeEdit2" style="width:60px" min="0" max="8000" value="0">
 		<button id='btnReadCode' 	class='w3-circle w3-green'  onclick='btnReadCode()'>R</button>
 		<button id='btnWriteCode' 	class='w3-circle w3-red'    onclick='btnWriteCode()'>W</button>		 
 		</br>
@@ -105,7 +105,7 @@
 		<button id='btnWriteCode' 	class='w3-button w3-round w3-green' onclick='btnOptionSendCmd()'>Send</button>
 		</br>
 		</br>
-		<textarea id='txtCodeTable' class='csTxtCodeTable' rows="10" cols="38">	</textarea>
+		<textarea id='txtCodeTable' class='csTxtCodeTable' rows="10" cols="35">	</textarea>
 	</div> <!-- one -->
 
 	<div class="g2-two" align="right">
@@ -269,18 +269,18 @@
 		</td>			
 	</tr>
 	<tr>
-			<button id='btnXyPlotOn' class='w3-button w3-tiny w3-blue' onclick='xyPlotOn(1)'>xy-PlotOn</button>
-			<button id='btnXyPlotOff' class='w3-button w3-tiny w3-red' onclick='xyPlotOn(0)'>xy-PlotOn</button>
+		SCOPE<label class="switch"> <input id ="checkScope" type="checkbox"><span class="slider round"></span></label>
+		<label class="switch"> <input id ="checkXY" type="checkbox"> <span class="slider round"></span> </label>XYPLOT
+
+		<!--button id='btnXyPlotOn' class='w3-button w3-tiny w3-blue' onclick='xyPlotOn( )'>xy-PlotOn</button-->
+		<!--button id='btnXyPlotOff' class='w3-button w3-tiny w3-red' onclick='xyPlotOn(0 )'>xy-PlotOff</button-->
 	</tr>
 </table>
 </div><!-- three -->
-
 </div><!-- wrapper -->
-
 <div align = "center" class='tail' style="margin:20px">
 	<span class="title1 titleName"> Inverter Monitoring System by Dong-Ho Power Electronic ( T.E.L.82-51-262-7532 ) </span>
 </div> <!-- tail-->
-
 </div> <!-- container -->
 <!-- control handlers -->
 
@@ -293,9 +293,9 @@ var ch4_list = document.getElementsByName('ch4_list1_list2')[0];
 
 var ChList = new Array();
 ChList[0] ='';
-ChList[1] = ['U|4','V|5','W|6','d|0','q|1','D|2','Q|3'];
-ChList[2] = ['U|11','V|12','W|13','d|7','q|8','D|9','Q|10'];
-ChList[3] = ['Iu|14','Iv|15','se|18','cmd|19','Vdc|16','T|17'];
+ChList[1] = ['U|4','V|5','W|6','d|0','q|1','D|2','Q|3','D_ref|26','Q-ref|27'];
+ChList[2] = ['U|11','V|12','W|13','d|7','q|8','D|9','Q|10','D-ref|28','Q-ref|29'];
+ChList[3] = ['Iu|14','Iv|15','se|18','cmd|19','Vdc|16','Temp|17'];
 ChList[4] = ['U|20','V|21','W|22'];
 ChList[5] = ['Theta|30','ThetaM|31','sinTheta|32','cosTheta|33','we|34','wr|35','wr_m|36'];
 
@@ -353,12 +353,5 @@ function setScopeCh(ch){
    console.log(chSelected[ch],scale,offset);
    sendSetScopeChCmd(ch,chSelected[ch],scale,offset);
 }
-
-function xyPlotOn(arg1){
-   xyPlotState = arg1;
-   console.log('xyPloteState = ',arg1);   
-}
-
-
 </script>
 {% endblock %}
