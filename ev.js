@@ -98,39 +98,38 @@ server.listen(portAddr);
 
 io.on('connection', function (socket) {
 	var host  = socket.client.request.headers.host;
-	console.log('connected to : ' + host);
+	//console.log('connected to : ' + host);
 	socket.on('disconnect', function () {
-  	console.log('disconnected from : ' + host);
-  });
+  	//console.log('disconnected from : ' + host);
+  	});
 
 	socket.on('graph',function(msg){
-		console.log('scoket on graph =',msg);
 		graphOnOff = msg;
 	});
 
 	socket.on('scope',function(msg){
-		console.log('scoket on scope =',msg);
-		console.log(msg);
+		//console.log('scoket on scope =',msg);
+		//console.log(msg);
 		scopeOnOff = msg;
 	});
 
 	socket.on('codeEdit',function(msg){
-		console.log('scoket on codeEdit =',msg);
+		//console.log('scoket on codeEdit =',msg);
 //		myPort.on('readable',()=>console.log('Rxd gavage : ',myPort.read()));
-		console.log("Read Gavage buf:",myPort.read());
+		// console.log("Read Gavage buf:",myPort.read());
 		myPort.write(msg);
 	});
 
 	socket.on('getCodeList',function(msg){
-		console.log('scoket on codeList =',msg);
-//		myPort.on('readable',()=>console.log('Rxd gavage : ',myPort.read()));
-		console.log("Read Gavage buf:",myPort.read());
+		// console.log('scoket on codeList =',msg);
+		// myPort.on('readable',()=>console.log('Rxd gavage : ',myPort.read()));
+		// console.log("Read Gavage buf:",myPort.read());
 		myPort.write('9:4:901:0.000e+0');
 	});
 
 /* use io */
 	socket.on('btnClick',function(msgTx){
-		console.log(msgTx.selVac);
+		//console.log(msgTx.selVac);
 		var digitalOut = 1;
 		if( msgTx.selVac == 0){
 			inveStart = 1;
@@ -150,10 +149,8 @@ io.on('connection', function (socket) {
 			digiOut = digiOut | 2;			// clear ArmOff;
 			digiOut = digiOut & 0xfb;
 		} else if( msgTx.selVac == 6){
-			shutdown(function(output){
-    			console.log(output);
-			});
-		} else if( msgTx.selVac == 7){
+			shutdown(function(output){ console.log(output); });
+		} else if( msgTx.selVac == 7){ 
 			gracefulShutdown();
 		}
   });
@@ -174,7 +171,6 @@ io.on('connection', function (socket) {
 	myEmitter.on('mScope',function(data){
 		socket.emit('scope',data);
 	});
-
 });
 
 var graphData = { rpm:0,Irms:0,Power:0,Ref:0,Vdc:0,Graph1:0,Graph2:0,Graph3:0,Graph4:0,Graph6:0};
@@ -184,32 +180,30 @@ var graphProcCount = 0;
 const {SerialPort} = require('serialport');
 //const { ReadlineParser } = require('@serialport/parser-readline');
 const {InterByteTimeoutParser} = require('@serialport/parser-inter-byte-timeout');
-//const parser = port.pipe(new InterByteTimeoutParser({ interval: 50}));
-
-let portName = '/dev/ttyS0';
-let myPort = new SerialPort({path:portName, baudRate:115200});
-
-// const parser = myPort.pipe(new InterByteTimeoutParser({ interval: 50 }));
-
-/*
-myPort.pipe(parser);
-myPort.on('open', () => console.log(myPort.baudRate));
-parser.on('data', readSerialData);
-myPort.on('close', ()=>console.log("port closed!"));
-myPort.on('error', (err)=>console.log('Error :',err));
-*/
 
 SerialPort.list().then(
 	ports => {
 	  ports.forEach(port => {
 	  if(port.manufacturer === "Silicon Labs"){
 		portName = port.path;
-		myPort = new SerialPort({path:portName, baudRate:115200});
+		myPort = new SerialPort({
+			path:portName, 
+			baudRate:115200, 
+			dataBits : 8,
+			parity : 'none',
+			stopBits: 1,
+			flowControl: 'hardware'
+		});
 		//const parser = myPort.pipe(new ReadlineParser({ delimiter: '\r\n' }));
-		const parser = myPort.pipe(new InterByteTimeoutParser({ interval: 100 }));
-		myPort.pipe(parser);
-		myPort.on('open', () => console.log('COM open : '+ portName + ' : ' + 'baudRate = '+ myPort.baudRate ));
+		const parser = myPort.pipe(new InterByteTimeoutParser({ interval: 50}));
+		// myPort.pipe(parser);
+		myPort.on('open', 
+			() => console.log('COM open : '+portName+':'+'baudRate='+myPort.baudRate
+		));
+//		myPort.on('data', (rxdata) => console.log(rxdata.toString('utf-8')));
+		//myPort.on('data', readSerialData);
 		parser.on('data', readSerialData);
+
 		myPort.on('close', ()=>console.log("port closed!"));
 		myPort.on('error', (err)=>console.log('Error :',err));
 	  }
@@ -218,23 +212,20 @@ SerialPort.list().then(
 	},
 	err => {
 	  console.error('Error listing ports', err)
-	}
-  );
-
+    }
+);
 
 function readSerialData(data) {
-// parser.on('data', function(data){
+
 	var temp1 = 0;
 	var temp2 = 0;
 	var y =0;
-
 
 	var buff = new Buffer.from(data);
 	var command_addr = parseInt(buff.slice(4,7));
 	var command_data = parseFloat(buff.slice(8,16));
 
-	//console.log(data.toString('utf-8'));
-	console.log(data);
+	console.log(data.toString('utf-8'));
 
 	if(( buff.length < 16 ) || ( command_addr !== 900 )){
 		if( command_addr == 901 ){
@@ -410,13 +401,6 @@ process.on('SIGTERM', function () {
 process.on('SIGINT', function () {
     process.exit(0);
 });
-
-/*
-process.on('exit', function () {
-    console.log('\nShutting down, performing GPIO cleanup');
-    process.exit(0);
-});
-*/
 
 process.on('exit', (code) => {
 	setTimeout(()=>{
