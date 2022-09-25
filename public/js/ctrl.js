@@ -44,41 +44,84 @@ function scopeClear(){
    }
    oscope.onPaint(scopeData);
 }
+var speedAlarmColor ='';
+speedAlarmColor = '[{"from": -6000, "to":-4000,"color": "rgba(255,  0,  0, 1.0)"},';
+speedAlarmColor += '{"from": -4000, "to":4000, "color": "rgba(255,255,255, 0.5)"},';
+speedAlarmColor += '{"from": 4000, "to": 6000, "color": "rgba(255,0,0, 1.0)"}]';
+
+var refAlarmColor = '[{"from": -300, "to":-200, "color": "rgba(255,0,0,1.0)"},';
+refAlarmColor +=     '{"from":  200, "to": 300, "color": "rgba(255,0,0,1.0)"}]';
+
+var qAlarmColor = '[{"from":  0,"to":200,"color":"rgba(255,255,0,5.0)"},';
+qAlarmColor  +=   ' {"from":501,"to":720,"color":"rgba(255,0,0,.3)"},';
+qAlarmColor  +=   ' {"from":721,"to":800,"color":"rgba(255,0,0,1.0)"}]';
+
+var i500AlarmColor = '[{"from":  0.0,"to":300.0,"color":"rgba(255,255,255,1.0)"},';
+i500AlarmColor +=    ' {"from":300.0,"to":400.0,"color":"rgba(255,0,0,.3)"},';
+i500AlarmColor +=    ' {"from": 400.0,  "to":500.0, "color": "rgba(255,0,0,1.0)"}]';
+
+var i250AlarmColor = '[{"from":   0.0, "to":150.0, "color": "rgba(255,255,255,1.0)"},';
+i250AlarmColor  +=   ' {"from": 150.0, "to":200.0, "color": "rgba(255,0,0,.3)"},';
+i250AlarmColor  +=   ' {"from": 200.0, "to":250.0, "color": "rgba(255,0,0,1.0)"}]';
+
+var i100AlarmColor = '[{"from":  0.0,"to": 50.0,"color":"rgba(255,255,255,1.0)"},';
+i100AlarmColor  +=    '{"from": 50.0,"to": 75.0,"color":"rgba(255,0,0,.3)"},';
+i100AlarmColor  +=    '{"from": 75.0,"to":100.0,"color":"rgba(255,0,0,1.0)"}]';
+
+var  i50AlarmColor = '[{"from":  0.0,"to": 30.0,"color":"rgba(255,255,255,1.0)"},';
+i50AlarmColor +=     ' {"from": 30.0,"to": 40.0,"color":"rgba(255,0,0,.3)"},';
+i50AlarmColor +=     ' {"from": 40.0,"to": 50.0,"color": "rgba(255,0,0,1.0)"}]';
+
+var  i25AlarmColor = '[{"from":  0.0,"to": 15.0,"color":"rgba(255,255,255,1.0)"},';
+i25AlarmColor  +=    ' {"from": 15.0,"to": 20.0,"color":"rgba(255,0,0,.3)"},';
+i25AlarmColor  +=    ' {"from": 20.0,"to": 25.0,"color":"rgba(255,0,0,1.0)"}]';
+
+var i10AlarmColor = '[{"from":  0.0,"to":  5.0,"color":"rgba(255,255,255,1.0)"},';
+i10AlarmColor  +=    '{"from":  5.0,"to":  7.5,"color":"rgba(255,0,0,.3)"},';
+i10AlarmColor  +=    '{"from":  7.0,"to": 10.0,"color":"rgba(255,0,0,1.0)"}]';
 
 var gaugeSpeed={id:'gauge1',unit:'[RPM]',title:'Speed',min:-6000,max:6000,
-mTick:[-6000,-4000,-2000,0,2000,4000,6000],
-//alarm:'[ {"from": -6000, "to":-4000, "color": "rgba(255,  0,  0, 1.0)"},{"from": -4000, "to":-2000, "color": "rgba(255,255,  0, 0.5)"}, {"from": -2000, "to": 2000, "color": "rgba(255,255,255, 0.5)"},{"from":  000 , "to": 4000, "color": "rgba(255,255,  0, 0.5)"}, {"from": 4000 , "to": 6000, "color": "rgba(255,  0,  0, 1.5)"}]'
-alarm:'[ {"from": -6000, "to":-4000, "color": "rgba(255,  0,  0, 1.0)"},{"from": -4000, "to":4000, "color": "rgba(255,255,255, 0.5)"}, {"from": 4000, "to": 6000, "color": "rgba(255,0,0, 1.0)"}]'
+   mTick:[-6000,-4000,-2000,0,2000,4000,6000],
+   alarm: speedAlarmColor
 }
 
 var gaugeRefOut={id:'gauge2',unit:'[Rate %]',title:'Speed/Torq',min:-300,max:300,
-mTick:[-300,-200,-100,0,100,200,300],
-alarm:'[ {"from": -300, "to":-200,"color": "rgba(255,0,0,1.0)"},{"from": 200,  "to":300, "color": "rgba(255,0,0,1.0)"}]'
+   mTick:[-300,-200,-100,0,100,200,300],
+   alarm: refAlarmColor
 }
-
 var gaugeI500={id:'gauge3',unit:'[A]',title:'I_ac',min:0,max:500,
 mTick:[0,100,200,300,400,500],
-alarm:'[ {"from": 0, "to":300.0,"color": "rgba(255,255,255,1.0)"},{"from": 300.0,  "to":400.0, "color": "rgba(255,0,0,.3)"},{"from": 400.0,  "to":500.0, "color": "rgba(255,0,0,1.0)"}]'
+alarm: i500AlarmColor
+}
+
+var gaugeI250={id:'gauge3',unit:'[A]',title:'I_ac',min:0,max:250,
+   mTick:[0,50,100,150,200,250],
+   alarm:i250AlarmColor
 }
 
 var gaugeI100={id:'gauge3',unit:'[A]',title:'I_ac',min:0,max:100,
-mTick:[0,25,50,75,100],
-alarm:'[ {"from": 0, "to":50.0,"color": "rgba(255,255,255,1.0)"},{"from": 50.0,  "to":75.0, "color": "rgba(255,0,0,.3)"},{"from": 75.0,  "to":100.0, "color": "rgba(255,0,0,1.0)"}]'
+   mTick:[0,25,50,75,100],
+   alarm: i100AlarmColor
 }
 
 var gaugeI50={id:'gauge3',unit:'[A]',title:'I_ac',min:0,max:50,
-mTick:[0,10,20,30,40,50],
-alarm:'[ {"from": 0, "to":30.0,"color": "rgba(255,255,255,1.0)"},{"from": 30.0,  "to":40.0, "color": "rgba(255,0,0,.3)"},{"from": 40.0,  "to":50.0, "color": "rgba(255,0,0,1.0)"}]'
+   mTick:[0,10,20,30,40,50],
+   alarm:i50AlarmColor
+}
+
+var gaugeI25={id:'gauge3',unit:'[A]',title:'I_ac',min:0,max:25,
+   mTick:[0,5,10,15,20,25],
+   alarm:i25AlarmColor
 }
 
 var gaugeI10={id:'gauge3',unit:'[A]',title:'I_ac',min:0,max:10.0,
-mTick:[0,2.5,5.0,7.5,10.0],
-alarm:'[ {"from": 0, "to":5.0,"color": "rgba(255,255,255,1.0)"},{"from": 5.0,  "to":7.5, "color": "rgba(255,0,0,.3)"},{"from": 7.5,"to":10.0, "color": "rgba(255,0,0,1.0)"}]'
+   mTick:[0,2.5,5.0,7.5,10.0],
+   alarm:i10AlarmColor
 }
 
 var gaugeQ={id:'gauge4',unit:'[Vdc]',title:'Vdc',min:0,max:800,
-mTick:[0,200,400,600,800],
-alarm:'[ {"from": 0, "to":200,"color": "rgba(255,255,0,5.0)"},{"from": 501,  "to":720, "color": "rgba(255,0,0,.3)"},{"from": 721,  "to":800, "color": "rgba(255,0,0,1.0)"}]'
+   mTick:[0,200,400,600,800],
+   alarm: qAlarmColor
 }
 
 function gaugeInit(arg){
@@ -104,9 +147,8 @@ $("document").ready(function() {
 
    gaugeInit(gaugeSpeed);
    gaugeInit(gaugeRefOut);
-   gaugeInit(gaugeI10);
+   gaugeInit(gaugeI25);
    gaugeInit(gaugeQ);
-
 });
 
 function btnStartGraph(){
@@ -336,10 +378,10 @@ function btnOptionSendCmd(){
       cmd = '9:4:908:0.000e+1';  // read INput state and pwm trip
       socket.emit('codeEdit',cmd);
    } else if(value == 5) { 
-      cmd = '9:6:900:9.000e+1';  // reset all codes to factory setting
-      // socket.emit('codeEdit',cmd);
+      cmd = '9:4:900:2.000e-0';  // About us
+      socket.emit('codeEdit',cmd);
    } else if(value == 6) { 
-      cmd = '9:4:900:1.000e+1';  // read trip record
+      cmd = '9:4:903:0.000e-0';  // read trip record 2022.0921
       socket.emit('codeEdit',cmd);
    }
 }
@@ -439,8 +481,8 @@ socket.on('graph', function (msg) {
 //convert to
 
    var speed =   ((msg.rpm  -2048)/ 2048) * 5000;
-   var ref_out = ((msg.Ref  -2048)/ 2048) * 500;
-   var I_rms =   ((msg.Irms -2048)/ 2048) * I_SENS_VALUE;
+   var ref_out = ((msg.Ref  -2048)/ 2048) * 250;
+   var I_rms =   ((msg.Irms -2048)/ 2048) * 25;
    var Vdc =     ((msg.Vdc  -2048)/ 2048) * 1000;
 
    console.log('rpm =',speed,'Irms =',I_rms,' ref_out = ',ref_out,'Vdc = ',Vdc);

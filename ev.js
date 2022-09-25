@@ -114,14 +114,14 @@ io.on('connection', function (socket) {
 	});
 
 	socket.on('codeEdit',function(msg){
-		//console.log('scoket on codeEdit =',msg);
+		console.log('scoket on codeEdit =',msg);
 //		myPort.on('readable',()=>console.log('Rxd gavage : ',myPort.read()));
 		// console.log("Read Gavage buf:",myPort.read());
 		myPort.write(msg);
 	});
 
 	socket.on('getCodeList',function(msg){
-		// console.log('scoket on codeList =',msg);
+		console.log('scoket on codeList =',msg);
 		// myPort.on('readable',()=>console.log('Rxd gavage : ',myPort.read()));
 		// console.log("Read Gavage buf:",myPort.read());
 		myPort.write('9:4:901:0.000e+0');
@@ -173,7 +173,7 @@ io.on('connection', function (socket) {
 	});
 });
 
-var graphData = { rpm:0,Irms:0,Power:0,Ref:0,Vdc:0,Graph1:0,Graph2:0,Graph3:0,Graph4:0,Graph6:0};
+var graphData = { rpm:0,Irms:0,Power:0,Ref:0,Vdc:0,Graph1:0,Graph2:0,Graph3:0,Graph4:0};
 var scopeData = {Ch:0,data:[]};
 var graphProcCount = 0;
 
@@ -195,7 +195,7 @@ SerialPort.list().then(
 			flowControl: 'hardware'
 		});
 		//const parser = myPort.pipe(new ReadlineParser({ delimiter: '\r\n' }));
-		const parser = myPort.pipe(new InterByteTimeoutParser({ interval: 50}));
+		const parser = myPort.pipe(new InterByteTimeoutParser({ interval: 100}));
 		// myPort.pipe(parser);
 		myPort.on('open', 
 			() => console.log('COM open : '+portName+':'+'baudRate='+myPort.baudRate
@@ -221,11 +221,15 @@ function readSerialData(data) {
 	var temp2 = 0;
 	var y =0;
 
+	// console.log(data);
+
 	var buff = new Buffer.from(data);
 	var command_addr = parseInt(buff.slice(4,7));
 	var command_data = parseFloat(buff.slice(8,16));
 
 	console.log(data.toString('utf-8'));
+	console.log('addr = '+command_addr + ' : data =' + command_data);
+
 
 	if(( buff.length < 16 ) || ( command_addr !== 900 )){
 		if( command_addr == 901 ){
@@ -238,79 +242,69 @@ function readSerialData(data) {
 		}
 	}
 
-	if ( command_data < 100 ) {
-		var rx_data = data.slice(17,24);
-		var buff2 = data.substr(24);
-   	var buff = new Buffer.from(buff2,'utf8');
+	if ( command_data == 0 ) {
+		// 9:4:900:0.000e+0:9�9�9�9�9�9�9�9�
 
-   	var i = 0;
-   	var lsb = (buff[ i*3 + 2] & 0x0f) * 1 + (buff[i*3 + 1] & 0x0f) * 16;
-   	var msb = ( buff[i*3] & 0x0f ) * 256;
-   	var tmp = msb + lsb;
-		graphData.rpm = tmp;
+		if(data.length !== 33 ) return ;
+		var rx_data = data.slice(-16);
+		var buff = new Buffer.from(rx_data,'utf8');
 
-   	i = 1;
-   	lsb = (buff[ i*3 + 2] & 0x0f)*1 + (buff[i*3 + 1]  & 0x0f) * 16;
-   	msb = ( buff[i*3] & 0x0f ) * 256;
-   	tmp = msb + lsb;
-		graphData.Irms = tmp;
+		//console.log(buff.toString('utf-8'));
 
-   	i = 2;
-   	lsb = (buff[ i*3 + 2] & 0x0f)*1 + (buff[i*3 + 1] & 0x0f) * 16;
-   	msb = ( buff[i*3] & 0x0f ) * 256;
-   	tmp = msb + lsb;
-		graphData.Power = tmp;
+		var i = 7;
+		var msb = ( buff[i*2] & 0x0f) * 256;
+		var lsb = (buff[ i*2 + 1] & 0x7f) * 1;
+ 		lsb = ( (buff[i * 2 ] & 0x40 ) === 0x00 ) ? lsb  : lsb + 128;
+		graphData.Vdc = msb + lsb;
+		// console.log(graphData.Vdc);
 
-   	i = 3;
-   	lsb = (buff[ i*3 + 2] & 0x0f)*1 + (buff[i*3 + 1] & 0x0f) * 16;
-   	msb = ( buff[i*3] & 0x0f ) * 256;
-   	tmp = msb + lsb;
-		graphData.Ref = tmp;
+		i = 6;
+		msb = ( buff[i*2] & 0x0f) * 256;
+		lsb = (buff[ i*2 + 1] & 0x7f) * 1;
+ 		lsb = ( (buff[i * 2 ] & 0x40 ) === 0x00 ) ? lsb  : lsb + 124;
+		graphData.Ref = msb + lsb;
 
- 	i = 4;
-   	lsb = (buff[ i*3 + 2] & 0x0f)*1 + (buff[i*3 + 1] & 0x0f) * 16;
-   	msb = ( buff[i*3] & 0x0f ) * 256;
-   	tmp = msb + lsb;
-	graphData.Vdc = tmp;
+		i = 5;
+		msb = ( buff[i*2] & 0x0f) * 256;
+		lsb = (buff[ i*2 + 1] & 0x7f) * 1;
+ 		lsb = ( (buff[i * 2 ] & 0x40 ) === 0x00 ) ? lsb  : lsb + 124;
+		 graphData.rpm = msb + lsb;
+		 graphData.Graph6 = msb + lsb;
 
- 	i = 5;
-   	lsb = (buff[ i*3 + 2] & 0x0f)*1 + (buff[i*3 + 1] & 0x0f) * 16;
-   	msb = ( buff[i*3] & 0x0f ) * 256;
-   	tmp = msb + lsb;
-	graphData.Graph1 = tmp;
+		i = 4;
+		msb = ( buff[i*2] & 0x0f) * 256;
+		lsb = (buff[ i*2 + 1] & 0x7f) * 1;
+ 		lsb = ( (buff[i * 2 ] & 0x40 ) === 0x00 ) ? lsb  : lsb + 124;
+		 graphData.Irms = msb + lsb;
+		 graphData.Graph5 = msb + lsb;
 
- 	i = 6;
-   	lsb = (buff[ i*3 + 2] & 0x0f)*1 + (buff[i*3 + 1] & 0x0f) * 16;
-   	msb = ( buff[i*3] & 0x0f ) * 256;
-   	tmp = msb + lsb;
-	graphData.Graph2 = tmp;
+		i = 3;  
+		msb = ( buff[i*2] & 0x0f) * 256;
+		lsb = (buff[ i*2 + 1] & 0x7f) * 1;
+ 		lsb = ( (buff[i * 2 ] & 0x40 ) === 0x00 ) ? lsb  : lsb + 124;
+		graphData.Graph4 = msb + lsb;
 
- 	i = 7;
-   	lsb = (buff[ i*3 + 2] & 0x0f)*1 + (buff[i*3 + 1] & 0x0f) * 16;
-   	msb = ( buff[i*3] & 0x0f ) * 256;
-   	tmp = msb + lsb;
-	graphData.Graph3 = tmp;
+		i = 2;  
+		msb = ( buff[i*2] & 0x0f) * 256;
+		lsb = (buff[ i*2 + 1] & 0x7f) * 1;
+ 		lsb = ( (buff[i * 2 ] & 0x40 ) === 0x00 ) ? lsb  : lsb + 124;
+		graphData.Graph3 = msb + lsb;
 
- 	i = 8;
-   	lsb = (buff[ i*3 + 2] & 0x0f)*1 + (buff[i*3 + 1] & 0x0f) * 16;
-   	msb = ( buff[i*3] & 0x0f ) * 256;
-   	tmp = msb + lsb;
-	graphData.Graph4 = tmp;
+		i = 1;  
+		msb = ( buff[i*2] & 0x0f) * 256;
+		lsb = (buff[ i*2 + 1] & 0x7f) * 1;
+ 		lsb = ( (buff[i * 2 ] & 0x40 ) === 0x00 ) ? lsb  : lsb + 124;
+		graphData.Graph2 = msb + lsb;
 
- 	i = 9;
-   	lsb = (buff[ i*3 + 2] & 0x0f)*1 + (buff[i*3 + 1] & 0x0f) * 16;
-   	msb = ( buff[i*3] & 0x0f ) * 256;
-   	tmp = msb + lsb;
-	graphData.Graph5 = tmp;
+		i = 0;  
+		msb = ( buff[i*2] & 0x0f) * 256;
+		lsb = (buff[ i*2 + 1] & 0x7f) * 1;
+ 		lsb = ( (buff[i * 2 ] & 0x40 ) === 0x00 ) ? lsb  : lsb + 124;
+		graphData.Graph1= msb + lsb;
 
- 	i = 10;
-   	lsb = (buff[ i*3 + 2] & 0x0f)*1 + (buff[i*3 + 1] & 0x0f) * 16;
-   	msb = ( buff[i*3] & 0x0f ) * 256;
-   	tmp = msb + lsb;
-	graphData.Graph6 = tmp;
-
-	myEmitter.emit('mGraph', graphData);
+		myEmitter.emit('mGraph', graphData);
 		return;
+
 	} else if( command_data > 99 ) {
 		var i, j, lsb, msb, tmp;
 		var offset = 4;
@@ -328,22 +322,6 @@ function readSerialData(data) {
   			tmp = msb + lsb;
 			scope.data.push(tmp);
 		}
-
-/*
- for ( i = 0; i < NO_SCOPE_DATA ; i++){
-
-			msb =  buff[i*2 + offset];
-            // if ( (scopeData[j][i].byte.LSB) & 0x80) str[0] = ( str[4] | 0x20);
-            // if ( (scopeData[j][i].byte.LSB) & 0x40) str[0] = ( str[4] | 0x10);
-
-			if (( msb & 0x20 ) == 0x20 ) lsb = ( buff[i * 2 + 1 + offset ] | 0x80 ) ;
-			if (( msb & 0x10 ) == 0x00 ) lsb = (lsb & 0xbf ) ;
-
-
-  			tmp = ( msb & 0x0f ) * 256 + lsb * 1 ;
-			scope.data.push(tmp);
-		}
-*/
 		// console.log(scope.data);
 		myEmitter.emit('mScope', scope);
 		return;
@@ -359,12 +337,12 @@ function sleepFor( sleepDuration ){
 //--- time interval
 
 setInterval(function(){
-	if(graphOnOff) myPort.write('9:4:900:0.000e+0');
+	if(graphOnOff == 1) myPort.write('9:4:900:0.000e-0'); // read graph
 },1000);
 
 
 setInterval(function() {
-	if(scopeOnOff)	  myPort.write('9:4:900:1.000e+2');
+	if(scopeOnOff == 1)	  myPort.write('9:4:900:1.000e+2');
 },4000);
 
 setInterval(function(){
