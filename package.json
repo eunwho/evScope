@@ -24,7 +24,7 @@
     "morgan": "^1.5.3",
     "serialport": "^10.4.0",
     "serve-favicon": "^2.2.1",
-    "socket.io": "^1.7.4",
+    "socket.io": "^4.5.2",
     "swig": "^1.4.2"
   },
   "devDependencies": {
